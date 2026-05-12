@@ -128,6 +128,12 @@ def logout_view(request):
     return redirect('login')
 
 
+# ================= HOME =================
+
+def home(request):
+    return render(request, "home.html" )
+
+
 # ================= DASHBOARDS =================
 
 @login_required
