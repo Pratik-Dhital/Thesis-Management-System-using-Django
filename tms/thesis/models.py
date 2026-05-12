@@ -7,8 +7,10 @@ class ThesisStatus(models.Model):
         return self.name
 
 class Proposal(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
+    document = models.FileField(upload_to='proposal_documents/', null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
     status = models.ForeignKey(ThesisStatus, on_delete=models.CASCADE)
 
