@@ -1,15 +1,14 @@
 from django.shortcuts import render, redirect
 from .models import Student, Lecturer, Supervisor
 from django.http import HttpResponse
-from django.contrib.auth import (
-    get_user_model,
-    authenticate,
-    logout,
-    login as auth_login
-)
+from django.contrib.auth import (get_user_model,authenticate,logout,login as auth_login)
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
+from .forms import (
+    StudentProfileForm,
+    LecturerProfileForm,
+    SupervisorProfileForm
+)
 
 User = get_user_model()
 
@@ -92,7 +91,7 @@ def signup_view(request):
 
             Student.objects.create(
                 user=user,
-                full_name=f"{first_name} {last_name}"
+                full_name=f"{first_name} {last_name}",
             )
 
         elif role == "lecturer":
@@ -136,19 +135,179 @@ def home(request):
 
 # ================= DASHBOARDS =================
 
+
 @login_required
 def student_dashboard(request):
 
-    return HttpResponse("Student Dashboard")
+    student = Student.objects.get(
+        user=request.user
+    )
 
+    if (
+        not student.roll_no or
+        not student.faculty or
+        not student.department or
+        not student.academic_level
+    ):
+
+        return redirect(
+            'complete_student_profile'
+        )
+
+    return render(
+        request,
+        "student/dashboard.html"
+    )
 
 @login_required
 def lecturer_dashboard(request):
 
-    return HttpResponse("Lecturer Dashboard")
+    lecturer = Lecturer.objects.get(
+        user=request.user
+    )
 
+    if (
+        not lecturer.designation or
+        not lecturer.faculty or
+        not lecturer.department
+    ):
+
+        return redirect(
+            'complete_lecturer_profile'
+        )
+
+    return render(
+        request,
+        "lecturer/dashboard.html"
+    )
 
 @login_required
 def supervisor_dashboard(request):
 
-    return HttpResponse("Supervisor Dashboard")
+    supervisor = Supervisor.objects.get(
+        user=request.user
+    )
+
+    if (
+        not supervisor.designation or
+        not supervisor.qualification or
+        not supervisor.faculty or
+        not supervisor.department
+    ):
+
+        return redirect(
+            'complete_supervisor_profile'
+        )
+
+    return render(
+        request,
+        "supervisor/dashboard.html"
+    )
+
+@login_required
+def complete_student_profile(request):
+
+    student = Student.objects.get(
+        user=request.user
+    )
+
+    form = StudentProfileForm(
+        instance=student
+    )
+
+    if request.method == 'POST':
+
+        form = StudentProfileForm(
+            request.POST,
+            instance=student
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            return redirect(
+                'student_dashboard'
+            )
+
+    context = {
+        'form': form
+    }
+
+    return render(
+        request,
+        'student/complete_profile.html',
+        context
+    )
+
+@login_required
+def complete_lecturer_profile(request):
+
+    lecturer = Lecturer.objects.get(
+        user=request.user
+    )
+
+    form = LecturerProfileForm(
+        instance=lecturer
+    )
+
+    if request.method == 'POST':
+
+        form = LecturerProfileForm(
+            request.POST,
+            instance=lecturer
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            return redirect(
+                'lecturer_dashboard'
+            )
+
+    context = {
+        'form': form
+    }
+
+    return render(
+        request,
+        'lecturer/complete_profile.html',
+        context
+    )
+
+@login_required
+def complete_supervisor_profile(request):
+
+    supervisor = Supervisor.objects.get(
+        user=request.user
+    )
+
+    form = SupervisorProfileForm(
+        instance=supervisor
+    )
+
+    if request.method == 'POST':
+
+        form = SupervisorProfileForm(
+            request.POST,
+            instance=supervisor
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            return redirect(
+                'supervisor_dashboard'
+            )
+
+    context = {
+        'form': form
+    }
+
+    return render(
+        request,
+        'supervisor/complete_profile.html',
+        context
+    )

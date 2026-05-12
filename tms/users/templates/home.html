@@ -1,22 +1,37 @@
 {% extends "base.html" %}
 {% block start %}
 
-<div class="container mt-5">
+<div class="text-center">
+    <h1 class="mb-3 mt-5">Thesis Management System</h1>
+    <p class="text-muted">Manage submissions, reviews, and approvals efficiently</p>
 
-    <h1>Thesis Management System</h1>
-
-    <p>Welcome to Thesis Management System</p>
-
-    <a href="/login/" class="btn btn-primary">
-        Login
-    </a>
-
-    <a href="/signup/" class="btn btn-success">
-        Signup
-    </a>
-
+    <div class="mt-4">
+        <a href="/login/" class="btn btn-primary btn-lg me-2">Login</a>
+        <a href="/signup/" class="btn btn-success btn-lg">Signup</a>
+    </div>
 </div>
 
+<hr class="my-5">
 
+<div class="row text-center">
+    <div class="col-md-4">
+        <div class="card shadow p-3">
+            <h4>Students</h4>
+            <p>Submit thesis, track progress, get feedback</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow p-3">
+            <h4>Lecturers</h4>
+            <p>Review and guide student submissions</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow p-3">
+            <h4>Supervisors</h4>
+            <p>Approve and finalize theses</p>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

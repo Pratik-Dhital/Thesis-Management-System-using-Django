@@ -30,7 +30,7 @@ class Student(models.Model):
     academic_level = models.ForeignKey(AcademicLevel, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return self.full_name
+        return f"{self.full_name} - {self.roll_no}"
     
 class Lecturer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

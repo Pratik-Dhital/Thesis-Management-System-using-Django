@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block start %}
+
+<h2>Lecturer Dashboard</h2>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card bg-info text-white p-3">
+            <h5>Assigned Theses</h5>
+            <p>Review assigned submissions</p>
+            <a href="#" class="btn btn-light btn-sm">View</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark p-3">
+            <h5>Pending Reviews</h5>
+            <p>Theses awaiting feedback</p>
+            <a href="#" class="btn btn-dark btn-sm">Review</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-success text-white p-3">
+            <h5>Completed Reviews</h5>
+            <p>Reviewed submissions</p>
+            <a href="#" class="btn btn-light btn-sm">View</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -16,14 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from users.views import login_view, signup_view, logout_view, student_dashboard, supervisor_dashboard, lecturer_dashboard, home
+from users.views import login_view, signup_view, logout_view, student_dashboard, supervisor_dashboard, lecturer_dashboard, home, complete_lecturer_profile, complete_student_profile, complete_supervisor_profile
 urlpatterns = [
     path('', home, name='home'),
     path('login/', login_view, name="login"),
     path('signup/', signup_view, name="signup"),
     path('logout/', logout_view, name='logout'),
-    path('student_dashboard/', student_dashboard, name='student_dashboard'),
-    path('supervisor_dashboard/', supervisor_dashboard, name='supervisor_dashboard'),
-    path('lecturer_dashboard/', lecturer_dashboard, name='lecturer_dashboard'),
+    path('student/dashboard/', student_dashboard, name='student_dashboard'),
+    path('student/dashboard/create', student_dashboard, name='student_dashboard.create'),
+    path('student/dashboard/<int:id>/edit', student_dashboard, name='student_dashboard.edit'),
+    path('supervisor/dashboard/', supervisor_dashboard, name='supervisor_dashboard'),
+    path('lecturer/dashboard/', lecturer_dashboard, name='lecturer_dashboard'),
+    path('student/profile/', complete_student_profile, name='complete_student_profile'),
+    path('lecturer/profile/', complete_lecturer_profile, name='complete_lecturer_profile'),
+    path('supervisor/profile/', complete_supervisor_profile, name='complete_supervisor_profile'),
     path('admin/', admin.site.urls),
-]
+]   

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block start %}
+
+<h2>Student Dashboard</h2>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white p-3">
+            <h5>My Thesis</h5>
+            <p>View and manage your thesis</p>
+            <a href="#" class="btn btn-light btn-sm">View</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark p-3">
+            <h5>Submit Proposal</h5>
+            <p>Create new thesis proposal</p>
+            <a href="#" class="btn btn-dark btn-sm">Submit</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-success text-white p-3">
+            <h5>Notifications</h5>
+            <p>Check updates and feedback</p>
+            <a href="#" class="btn btn-light btn-sm">View</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

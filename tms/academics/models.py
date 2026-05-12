@@ -7,7 +7,7 @@ class Faculty(models.Model):
 
     def __str__(self):
         return self.name
-
+    
 class Department(models.Model):
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
