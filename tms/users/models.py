@@ -7,7 +7,7 @@ from academics.models import Faculty, Department, AcademicLevel
 ROLE_CHOICES = (
     ('student', 'Student'),
     ('lecturer', 'Lecturer'),
-    ('supervisor', 'Supervisor'),
+    ('admin', 'Admin'),
 )
 
 class User(AbstractUser):
@@ -35,20 +35,21 @@ class Student(models.Model):
 class Lecturer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=150)
-    designation = models.CharField(max_length=100)
+    designation = models.CharField(max_length=100, null=True, blank=True)
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
+    is_supervisor = models.BooleanField(default=False)
 
     def __str__(self):
         return self.full_name
     
-class Supervisor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=150)
-    designation = models.CharField(max_length=100)
-    qualification = models.CharField(max_length=100)
-    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, null=True, blank=True)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
+# class Supervisor(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+#     full_name = models.CharField(max_length=150)
+#     designation = models.CharField(max_length=100)
+#     qualification = models.CharField(max_length=100)
+#     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, null=True, blank=True)
+#     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
 
-    def __str__(self):
-        return self.full_name
+#     def __str__(self):
+#         return self.full_name

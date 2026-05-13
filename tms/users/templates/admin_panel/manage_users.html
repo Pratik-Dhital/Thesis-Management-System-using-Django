@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block start %}
+
+<h2>Manage Users</h2>
+
+<table class="table">
+
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Action</th>
+    </tr>
+
+    {% for user in users %}
+
+    <tr>
+
+        <td>
+            {{ user.first_name }} {{ user.last_name }}
+        </td>
+
+        <td>
+            {{ user.email }}
+        </td>
+
+        <td>
+            {{ user.role }}
+        </td>
+
+        <td>
+
+            <a href="/admin-panel/assign-role/{{user.id}}/"
+               class="btn btn-success">
+
+               Assign Role
+
+            </a>
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

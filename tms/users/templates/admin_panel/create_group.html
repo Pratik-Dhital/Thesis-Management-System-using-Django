@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block start %}
+
+<form method="post"
+      class="card p-4">
+
+    {% csrf_token %}
+
+    <h2>Create Group</h2>
+
+    <input type="text"
+           name="name"
+           class="form-control"
+           placeholder="Group Name">
+
+    <select name="supervisor"
+            class="form-control mt-3">
+
+        {% for supervisor in supervisors %}
+
+        <option value="{{supervisor.id}}">
+            {{supervisor.full_name}}
+        </option>
+
+        {% endfor %}
+
+    </select>
+
+    <h4 class="mt-4">Select Members</h4>
+
+    {% for student in students %}
+
+    <div>
+
+        <input type="checkbox"
+               name="members"
+               value="{{student.id}}">
+
+        {{student.full_name}}
+
+    </div>
+
+    {% endfor %}
+
+    <button class="btn btn-primary mt-3">
+        Create Group
+    </button>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block start %}
+
+<h2>Manage Faculty</h2>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <input type="text"
+           name="name"
+           class="form-control"
+           placeholder="Faculty Name">
+
+    <button class="btn btn-primary mt-3">
+        Add Faculty
+    </button>
+
+</form>
+
+<hr>
+
+{% for faculty in faculties %}
+
+<div class="card p-3 mt-2">
+
+    {{ faculty.name }}
+
+</div>
+
+{% endfor %}
+
+{% endblock %}

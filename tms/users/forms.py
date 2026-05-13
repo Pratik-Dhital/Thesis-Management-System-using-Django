@@ -2,8 +2,7 @@ from django import forms
 
 from .models import (
     Student,
-    Lecturer,
-    Supervisor
+    Lecturer
 )
 
 
@@ -40,15 +39,15 @@ class LecturerProfileForm(forms.ModelForm):
 
 # ================= SUPERVISOR =================
 
-class SupervisorProfileForm(forms.ModelForm):
+# class SupervisorProfileForm(forms.ModelForm):
 
-    class Meta:
+#     class Meta:
 
-        model = Supervisor
+#         model = Supervisor
 
-        fields = [
-            'designation',
-            'qualification',
-            'faculty',
-            'department'
-        ]
+#         fields = [
+#             'designation',
+#             'qualification',
+#             'faculty',
+#             'department'
+#         ]

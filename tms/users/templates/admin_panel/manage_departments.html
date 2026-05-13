@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block start %}
+
+<h2>Manage Departments</h2>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <select name="faculty"
+            class="form-control">
+
+        {% for faculty in faculties %}
+
+        <option value="{{faculty.id}}">
+            {{faculty.name}}
+        </option>
+
+        {% endfor %}
+
+    </select>
+
+    <input type="text"
+           name="name"
+           class="form-control mt-3"
+           placeholder="Department Name">
+
+    <button class="btn btn-primary mt-3">
+        Add Department
+    </button>
+
+</form>
+
+<hr>
+
+{% for department in departments %}
+
+<div class="card p-3 mt-2">
+
+    {{ department.name }}
+    -
+    {{ department.faculty.name }}
+
+</div>
+
+{% endfor %}
+
+{% endblock %}

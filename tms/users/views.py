@@ -1,15 +1,16 @@
 from django.shortcuts import render, redirect
-from .models import Student, Lecturer, Supervisor
+from .models import Student, Lecturer
 from django.http import HttpResponse
 from django.contrib.auth import (get_user_model,authenticate,logout,login as auth_login)
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import (
     StudentProfileForm,
-    LecturerProfileForm,
-    SupervisorProfileForm
+    LecturerProfileForm
 )
-
+from academics.models import Faculty, Department
+from django.contrib.auth.decorators import user_passes_test
+from users.decorators import student_required, lecturer_required
 User = get_user_model()
 
 
@@ -38,8 +39,8 @@ def login_view(request):
             elif user.role == 'lecturer':
                 return redirect('lecturer_dashboard')
 
-            elif user.role == 'supervisor':
-                return redirect('supervisor_dashboard')
+            # elif user.role == 'admin':
+            #     return redirect('admin_dashboard')
 
         else:
             messages.error(
@@ -52,70 +53,70 @@ def login_view(request):
 
 # ================= SIGNUP =================
 
-def signup_view(request):
+# def signup_view(request):
 
-    if request.method == 'POST':
+#     if request.method == 'POST':
 
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        role = request.POST.get('role')
-        password = request.POST.get('password')
+#         first_name = request.POST.get('first_name')
+#         last_name = request.POST.get('last_name')
+#         username = request.POST.get('username')
+#         email = request.POST.get('email')
+#         role = request.POST.get('role')
+#         password = request.POST.get('password')
 
-        # Check duplicate email
-        if User.objects.filter(email=email).exists():
+#         # Check duplicate email
+#         if User.objects.filter(email=email).exists():
 
-            messages.error(
-                request,
-                "Email already exists"
-            )
+#             messages.error(
+#                 request,
+#                 "Email already exists"
+#             )
 
-            return redirect('signup')
+#             return redirect('signup')
 
-        # Create user
-        user = User.objects.create(
-            first_name=first_name,
-            last_name=last_name,
-            username=username,
-            email=email,
-            role=role
-        )
+#         # Create user
+#         user = User.objects.create(
+#             first_name=first_name,
+#             last_name=last_name,
+#             username=username,
+#             email=email,
+#             role=role
+#         )
 
-        user.set_password(password)
-        user.save()
+#         user.set_password(password)
+#         user.save()
 
-        # Create profile based on role
+#         # Create profile based on role
 
-        if role == "student":
+#         if role == "student":
 
-            Student.objects.create(
-                user=user,
-                full_name=f"{first_name} {last_name}",
-            )
+#             Student.objects.create(
+#                 user=user,
+#                 full_name=f"{first_name} {last_name}",
+#             )
 
-        elif role == "lecturer":
+#         elif role == "lecturer":
 
-            Lecturer.objects.create(
-                user=user,
-                full_name=f"{first_name} {last_name}"
-            )
+#             Lecturer.objects.create(
+#                 user=user,
+#                 full_name=f"{first_name} {last_name}"
+#             )
 
-        elif role == "supervisor":
+#         elif role == "supervisor":
 
-            Supervisor.objects.create(
-                user=user,
-                full_name=f"{first_name} {last_name}"
-            )
+#             Supervisor.objects.create(
+#                 user=user,
+#                 full_name=f"{first_name} {last_name}"
+#             )
 
-        messages.success(
-            request,
-            "Account created successfully"
-        )
+#         messages.success(
+#             request,
+#             "Account created successfully"
+#         )
 
-        return redirect('login')
+#         return redirect('login')
 
-    return render(request, "signup.html")
+#     return render(request, "signup.html")
 
 
 # ================= LOGOUT =================
@@ -137,6 +138,7 @@ def home(request):
 
 
 @login_required
+@student_required
 def student_dashboard(request):
 
     student = Student.objects.get(
@@ -160,6 +162,7 @@ def student_dashboard(request):
     )
 
 @login_required
+@lecturer_required
 def lecturer_dashboard(request):
 
     lecturer = Lecturer.objects.get(
@@ -181,28 +184,28 @@ def lecturer_dashboard(request):
         "lecturer/dashboard.html"
     )
 
-@login_required
-def supervisor_dashboard(request):
+# @login_required
+# def supervisor_dashboard(request):
 
-    supervisor = Supervisor.objects.get(
-        user=request.user
-    )
+#     supervisor = Supervisor.objects.get(
+#         user=request.user
+#     )
 
-    if (
-        not supervisor.designation or
-        not supervisor.qualification or
-        not supervisor.faculty or
-        not supervisor.department
-    ):
+#     if (
+#         not supervisor.designation or
+#         not supervisor.qualification or
+#         not supervisor.faculty or
+#         not supervisor.department
+#     ):
 
-        return redirect(
-            'complete_supervisor_profile'
-        )
+#         return redirect(
+#             'complete_supervisor_profile'
+#         )
 
-    return render(
-        request,
-        "supervisor/dashboard.html"
-    )
+#     return render(
+#         request,
+#         "supervisor/dashboard.html"
+#     )
 
 @login_required
 def complete_student_profile(request):
@@ -276,38 +279,197 @@ def complete_lecturer_profile(request):
         context
     )
 
-@login_required
-def complete_supervisor_profile(request):
+def admin_required(user):
+    return user.is_superuser
 
-    supervisor = Supervisor.objects.get(
-        user=request.user
+@user_passes_test(admin_required)
+def admin_dashboard(request):
+
+    return render(
+        request,
+        'admin_panel/dashboard.html'
     )
 
-    form = SupervisorProfileForm(
-        instance=supervisor
-    )
+@user_passes_test(admin_required)
+def create_user(request):
 
     if request.method == 'POST':
 
-        form = SupervisorProfileForm(
-            request.POST,
-            instance=supervisor
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        user = User.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            username=username,
+            email=email
         )
 
-        if form.is_valid():
+        user.set_password(password)
+        user.save()
 
-            form.save()
+        messages.success(
+            request,
+            "User created successfully"
+        )
 
-            return redirect(
-                'supervisor_dashboard'
-            )
+        return redirect('manage_users')
+
+    return render(
+        request,
+        'admin_panel/create_user.html'
+    )
+
+@user_passes_test(admin_required)
+def manage_users(request):
+
+    users = User.objects.all()
 
     context = {
-        'form': form
+        'users': users
     }
 
     return render(
         request,
-        'supervisor/complete_profile.html',
+        'admin_panel/manage_users.html',
         context
     )
+
+@user_passes_test(admin_required)
+def assign_role(request, user_id):
+
+    user = User.objects.get(id=user_id)
+
+    if request.method == 'POST':
+
+        role = request.POST.get('role')
+
+        user.role = role
+        user.save()
+
+        # create profile automatically
+
+        if role == 'student':
+
+            Student.objects.get_or_create(
+                user=user,
+                full_name=f"{user.first_name} {user.last_name}"
+            )
+
+        elif role == 'lecturer':
+
+            Lecturer.objects.get_or_create(
+                user=user,
+                full_name=f"{user.first_name} {user.last_name}"
+            )
+
+        messages.success(
+            request,
+            "Role assigned successfully"
+        )
+
+        return redirect('manage_users')
+
+    context = {
+        'user_obj': user
+    }
+
+    return render(
+        request,
+        'admin_panel/assign_roles.html',
+        context
+    )
+
+@user_passes_test(admin_required)
+def manage_faculty(request):
+
+    if request.method == 'POST':
+
+        name = request.POST.get('name')
+
+        Faculty.objects.create(
+            name=name
+        )
+
+        return redirect('manage_faculty')
+
+    faculties = Faculty.objects.all()
+
+    context = {
+        'faculties': faculties
+    }
+
+    return render(
+        request,
+        'admin_panel/manage_faculty.html',
+        context
+    )
+@user_passes_test(admin_required)
+def manage_department(request):
+
+    if request.method == 'POST':
+
+        faculty_id = request.POST.get('faculty')
+        name = request.POST.get('name')
+
+        faculty = Faculty.objects.get(id=faculty_id)
+
+        Department.objects.create(
+            faculty=faculty,
+            name=name
+        )
+
+        return redirect('manage_department')
+
+    faculties = Faculty.objects.all()
+    departments = Department.objects.all()
+
+    context = {
+        'faculties': faculties,
+        'departments': departments
+    }
+
+    return render(
+        request,
+        'admin_panel/manage_departments.html',
+        context
+    )
+
+# @login_required
+# def complete_supervisor_profile(request):
+
+#     supervisor = Supervisor.objects.get(
+#         user=request.user
+#     )
+
+#     form = SupervisorProfileForm(
+#         instance=supervisor
+#     )
+
+#     if request.method == 'POST':
+
+#         form = SupervisorProfileForm(
+#             request.POST,
+#             instance=supervisor
+#         )
+
+#         if form.is_valid():
+
+#             form.save()
+
+#             return redirect(
+#                 'supervisor_dashboard'
+#             )
+
+#     context = {
+#         'form': form
+#     }
+
+#     return render(
+#         request,
+#         'supervisor/complete_profile.html',
+#         context
+#     )

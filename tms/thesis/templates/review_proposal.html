@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block start %}
+
+<div class="card p-4">
+
+    <h2>{{ proposal.title }}</h2>
+
+    <p>{{ proposal.description }}</p>
+
+    <a href="{{ proposal.document.url }}"
+       class="btn btn-info">
+
+       View Document
+
+    </a>
+
+    <form method="POST" class="mt-4">
+
+        {% csrf_token %}
+
+        <textarea
+            name="comment"
+            class="form-control"
+            placeholder="Comment"
+        ></textarea>
+
+        <button
+            name="action"
+            value="approve"
+            class="btn btn-success mt-3"
+        >
+            Approve
+        </button>
+
+        <button
+            name="action"
+            value="reject"
+            class="btn btn-danger mt-3"
+        >
+            Reject
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

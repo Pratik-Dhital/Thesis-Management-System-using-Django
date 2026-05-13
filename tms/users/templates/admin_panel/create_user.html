@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block start %}
+
+<form method="post" class="col-6 mx-auto card p-4 mt-5">
+
+    {% csrf_token %}
+
+    <h2>Create User</h2>
+
+    <input type="text" name="first_name"
+           class="form-control mt-3"
+           placeholder="First Name">
+
+    <input type="text" name="last_name"
+           class="form-control mt-3"
+           placeholder="Last Name">
+
+    <input type="text" name="username"
+           class="form-control mt-3"
+           placeholder="Username">
+
+    <input type="email" name="email"
+           class="form-control mt-3"
+           placeholder="Email">
+
+    <input type="password" name="password"
+           class="form-control mt-3"
+           placeholder="Password">
+
+    <button class="btn btn-primary mt-3">
+        Create User
+    </button>
+
+</form>
+
+{% endblock %}
