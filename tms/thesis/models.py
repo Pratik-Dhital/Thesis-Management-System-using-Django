@@ -53,7 +53,19 @@ class Proposal(models.Model):
         null=True,
         blank=True
     )
+    reviewed_by_lecturer = models.ForeignKey(
+        Lecturer,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="lecturer_reviews"
+    )
 
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    
     def __str__(self):
         return self.title
 

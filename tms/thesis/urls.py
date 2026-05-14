@@ -5,6 +5,7 @@ from .views import (
     create_group,
     lecturer_proposals,
     review_proposal,
+    pending_proposals
 )
 
 urlpatterns = [
@@ -31,5 +32,11 @@ urlpatterns = [
         'lecturer/review/<int:proposal_id>/',
         review_proposal,
         name='review_proposal'
+    ),
+
+    path(
+        'lecturer/pending/',
+        pending_proposals,
+        name='pending_proposals'
     ),
 ]

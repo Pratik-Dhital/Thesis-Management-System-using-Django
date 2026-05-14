@@ -8,6 +8,13 @@
 
     <p>{{ proposal.description }}</p>
 
+    <p>
+        Current Status:
+        <strong>
+            {{ proposal.status.name }}
+        </strong>
+    </p>
+
     <a href="{{ proposal.document.url }}"
        class="btn btn-info">
 
@@ -19,26 +26,38 @@
 
         {% csrf_token %}
 
+        <label>
+            Select Status
+        </label>
+
+        <select
+            name="status"
+            class="form-control"
+        >
+
+            {% for status in statuses %}
+
+            <option
+                value="{{ status.id }}"
+            >
+                {{ status.name }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
         <textarea
             name="comment"
-            class="form-control"
+            class="form-control mt-3"
             placeholder="Comment"
         ></textarea>
 
         <button
-            name="action"
-            value="approve"
+            type="submit"
             class="btn btn-success mt-3"
         >
-            Approve
-        </button>
-
-        <button
-            name="action"
-            value="reject"
-            class="btn btn-danger mt-3"
-        >
-            Reject
+            Update Proposal
         </button>
 
     </form>

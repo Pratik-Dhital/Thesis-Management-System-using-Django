@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block start %}
+
+<h2>Pending Proposals</h2>
+
+{% for proposal in proposals %}
+
+<div class="card p-4 mt-3">
+
+    <h4>{{ proposal.title }}</h4>
+
+    <p>{{ proposal.description }}</p>
+
+    <a href="{% url 'review_proposal' proposal.id %}"
+       class="btn btn-primary">
+
+       Review
+
+    </a>
+
+</div>
+
+{% endfor %}
+
+{% endblock %}

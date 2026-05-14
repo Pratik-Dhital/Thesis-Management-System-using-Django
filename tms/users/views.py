@@ -8,6 +8,7 @@ from .forms import (
     StudentProfileForm,
     LecturerProfileForm
 )
+from notification.models import Notification
 from academics.models import Faculty, Department
 from django.contrib.auth.decorators import user_passes_test
 from users.decorators import student_required, lecturer_required
@@ -39,8 +40,8 @@ def login_view(request):
             elif user.role == 'lecturer':
                 return redirect('lecturer_dashboard')
 
-            # elif user.role == 'admin':
-            #     return redirect('admin_dashboard')
+            elif user.role == 'admin':
+                return redirect('admin_dashboard')
 
         else:
             messages.error(
@@ -435,6 +436,23 @@ def manage_department(request):
     return render(
         request,
         'admin_panel/manage_departments.html',
+        context
+    )
+
+@login_required
+def notifications(request):
+
+    notifications = Notification.objects.filter(
+        user=request.user
+    ).order_by('-created_at')
+
+    context = {
+        'notifications': notifications
+    }
+
+    return render(
+        request,
+        'notifications.html',
         context
     )
 

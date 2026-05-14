@@ -5,6 +5,10 @@ from .models import *
 from users.models import Student, Lecturer
 from users.decorators import lecturer_required
 from django.contrib import messages
+from django.utils import timezone
+from notification.models import Notification
+from .forms import ThesisDocumentForm
+from .forms import DefenseForm
 # Create your views here.
 
 @login_required
@@ -72,15 +76,12 @@ def submit_proposal(request):
         user=request.user
     )
 
-    # find student's group
-    member = GroupMember.objects.filter(
-        student=student
+    group = ThesisGroup.objects.filter(
+        groupmember__student=student
     ).first()
 
-    if not member:
+    if not group:
         return redirect('create_group')
-
-    group = member.group
 
     if request.method == 'POST':
 
@@ -140,45 +141,93 @@ def lecturer_proposals(request):
     )
 
 @login_required
+def pending_proposals(request):
+
+    lecturer = Lecturer.objects.get(
+        user=request.user
+    )
+
+    proposals = Proposal.objects.filter(
+        status_name = 'pending'
+    )
+
+    context = {
+        'proposals': proposals
+    }
+
+    return render(
+        request,
+        'thesis/pending_proposals.html',
+        context
+    )
+
+@login_required
 @lecturer_required
 def review_proposal(request, proposal_id):
+
+    lecturer = Lecturer.objects.get(
+        user=request.user
+    )
 
     proposal = Proposal.objects.get(
         id=proposal_id
     )
 
+    statuses = ThesisStatus.objects.all()
+
     if request.method == 'POST':
 
-        action = request.POST.get('action')
-        comment = request.POST.get('comment')
+        status_id = request.POST.get(
+            'status'
+        )
+
+        comment = request.POST.get(
+            'comment'
+        )
+
+        selected_status = ThesisStatus.objects.get(
+            id=status_id
+        )
+
+        proposal.status = selected_status
 
         proposal.lecturer_comment = comment
 
-        if action == 'approve':
+        proposal.reviewed_by_lecturer = lecturer
 
-            proposal.status = ThesisStatus.objects.get(
-                name='Lecturer Approved'
-            )
-
-        elif action == 'reject':
-
-            proposal.status = ThesisStatus.objects.get(
-                name='Lecturer Rejected'
-            )
+        proposal.reviewed_at = timezone.now()
 
         proposal.save()
 
+        # NOTIFICATION
+
+        members = GroupMember.objects.filter(
+            group=proposal.group
+        )
+
+        for member in members:
+
+            Notification.objects.create(
+                user=member.student.user,
+                message=f"""
+Proposal '{proposal.title}'
+updated to status:
+{selected_status.name}
+"""
+            )
+
         messages.success(
             request,
-            "Proposal reviewed successfully"
+            "Proposal updated successfully"
         )
 
         return redirect(
-            'lecturer_proposals'
+            'pending_proposals'
         )
 
     context = {
-        'proposal': proposal
+        'proposal': proposal,
+        'statuses': statuses
     }
 
     return render(
@@ -187,3 +236,165 @@ def review_proposal(request, proposal_id):
         context
     )
 
+@login_required
+def supervisor_pending_proposals(request):
+
+    lecturer = Lecturer.objects.get(
+        user=request.user
+    )
+
+    proposals = Proposal.objects.filter(
+        status_name='Lecturer Approved',
+        group__supervisor=lecturer
+    )
+
+    context = {
+        'proposals': proposals
+    }
+
+    return render(
+        request,
+        'thesis/supervisor_pending.html',
+        context
+    )
+
+@login_required
+def supervisor_review(request, proposal_id):
+
+    lecturer = Lecturer.objects.get(
+        user=request.user
+    )
+
+    proposal = Proposal.objects.get(
+        id=proposal_id
+    )
+
+    if request.method == 'POST':
+
+        action = request.POST.get('action')
+
+        comment = request.POST.get('comment')
+
+        proposal.supervisor_comment = comment
+
+        if action == 'approve':
+
+            proposal.status = 'supervisor_approved'
+
+            # CREATE THESIS AUTOMATICALLY
+
+            Thesis.objects.create(
+
+                title=proposal.title,
+
+                proposal=proposal,
+
+                lecturer=proposal.reviewed_by_lecturer,
+
+                status=ThesisStatus.objects.get(
+                    name='Approved'
+                )
+            )
+
+        else:
+
+            proposal.status = 'supervisor_rejected'
+
+        proposal.save()
+
+        return redirect(
+            'supervisor_pending'
+        )
+
+    context = {
+        'proposal': proposal
+    }
+
+    return render(
+        request,
+        'thesis/supervisor_review.html',
+        context
+    )
+
+@login_required
+def upload_thesis_document(request, thesis_id):
+
+    thesis = Thesis.objects.get(
+        id=thesis_id
+    )
+
+    if request.method == 'POST':
+
+        form = ThesisDocumentForm(
+            request.POST,
+            request.FILES
+        )
+
+        if form.is_valid():
+
+            document = form.save(
+                commit=False
+            )
+
+            document.thesis = thesis
+
+            document.save()
+
+            return redirect(
+                'student_dashboard'
+            )
+
+    else:
+
+        form = ThesisDocumentForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(
+        request,
+        'thesis/upload_document.html',
+        context
+    )
+
+@login_required
+def schedule_defense(request, thesis_id):
+
+    thesis = Thesis.objects.get(
+        id=thesis_id
+    )
+
+    if request.method == 'POST':
+
+        form = DefenseForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            defense = form.save(
+                commit=False
+            )
+
+            defense.thesis = thesis
+
+            defense.save()
+
+            return redirect(
+                'lecturer_dashboard'
+            )
+
+    else:
+
+        form = DefenseForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(
+        request,
+        'thesis/schedule_defense.html',
+        context
+    )

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block start %}
+
+<h2>Notifications</h2>
+
+{% for notification in notifications %}
+
+<div class="card p-3 mt-2">
+
+    {{ notification.message }}
+
+</div>
+
+{% endfor %}
+
+{% endblock %}
