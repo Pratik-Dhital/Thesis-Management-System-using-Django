@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block start %}
+
+<div class="container py-4">
+
+    <h2 class="mb-4">
+        Thesis Groups
+    </h2>
+
+    <div class="row">
+
+        {% for group in groups %}
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card shadow border-0 h-100">
+
+                <div class="card-body">
+
+                    <h4>
+                        {{ group.name }}
+                    </h4>
+
+                    <p>
+                        Supervisor:
+                        {{ group.supervisor.full_name }}
+                    </p>
+
+                    <a href="{% url 'lecturer_group_detail' group.id %}"
+                       class="btn btn-primary">
+
+                        Open Group
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

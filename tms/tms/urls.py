@@ -19,6 +19,7 @@ from django.urls import path, include
 from users.views import login_view, logout_view, student_dashboard,lecturer_dashboard, home, complete_lecturer_profile, complete_student_profile, admin_dashboard, create_user, manage_users, assign_role, manage_faculty, manage_department
 urlpatterns = [
     path('', home, name='home'),
+    path('users/', include('users.urls')),
     path('login/', login_view, name="login"),
     path('logout/', logout_view, name='logout'),
     path('student/dashboard/', student_dashboard, name='student_dashboard'),
@@ -28,6 +29,7 @@ urlpatterns = [
     path('student/profile/', complete_student_profile, name='complete_student_profile'),
     path('lecturer/profile/', complete_lecturer_profile, name='complete_lecturer_profile'),
     path('thesis/', include('thesis.urls')),
+    path('notification/', include('notification.urls')),
     path('admin-panel/', admin_dashboard, name='admin_dashboard'),
     path('admin-panel/create-user/', create_user, name='create_user'),
     path('admin-panel/manage-users/', manage_users, name='manage_users'),

@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block start %}
+
+<div class="container py-4">
+
+    <h2>
+        {{ group.name }}
+    </h2>
+
+    <hr>
+
+    <h4>
+        Supervisor
+    </h4>
+
+    <p>
+        {{ group.supervisor.full_name }}
+    </p>
+
+    <hr>
+
+    <h4>
+        Group Members
+    </h4>
+
+    {% for member in members %}
+
+    <div class="card p-3 mb-2">
+
+        {{ member.student.full_name }}
+
+    </div>
+
+    {% endfor %}
+
+    <hr>
+
+    <h4>
+        Proposal
+    </h4>
+
+    {% if proposal %}
+
+    <div class="card p-3">
+
+        <h5>
+            {{ proposal.title }}
+        </h5>
+
+        <p>
+            {{ proposal.description }}
+        </p>
+
+        <p>
+            Status:
+            {{ proposal.status.name }}
+        </p>
+
+        <a href="{{ proposal.document.url }}"
+           class="btn btn-info">
+
+            View Proposal
+
+        </a>
+
+    </div>
+
+    {% else %}
+
+    <div class="alert alert-warning">
+
+        No proposal submitted.
+
+    </div>
+
+    {% endif %}
+
+    <hr>
+
+    <h4>
+        Thesis Progress
+    </h4>
+
+    {% if progress %}
+
+        {% for item in progress %}
+
+        <div class="card p-3 mb-2">
+
+            <h5>
+                {{ item.title }}
+            </h5>
+
+            <p>
+                {{ item.description }}
+            </p>
+
+            <small>
+                {{ item.created_at }}
+            </small>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+    <div class="alert alert-info">
+
+        No thesis progress available.
+
+    </div>
+
+    {% endif %}
+
+    <hr>
+
+    <h4>
+        Thesis Documents
+    </h4>
+
+    {% if documents %}
+
+        {% for document in documents %}
+
+        <div class="card p-3 mb-2">
+
+            <a href="{{ document.file.url }}"
+               target="_blank">
+
+                Open Document
+
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+    <div class="alert alert-warning">
+
+        No thesis documents uploaded.
+
+    </div>
+
+    {% endif %}
+
+    <hr>
+
+    <h4>
+        Defense
+    </h4>
+
+    {% if defense %}
+
+    <div class="card p-3">
+
+        <p>
+            Date:
+            {{ defense.date }}
+        </p>
+
+        <p>
+            Time:
+            {{ defense.time }}
+        </p>
+
+        <p>
+            Venue:
+            {{ defense.venue }}
+        </p>
+
+    </div>
+
+    {% else %}
+
+    <div class="alert alert-warning">
+
+        Defense not scheduled.
+
+    </div>
+
+    {% endif %}
+
+    <hr>
+
+    <a href="{% url 'send_notification' group.id %}"
+       class="btn btn-primary">
+
+        Send Notification
+
+    </a>
+
+</div>
+
+{% endblock %}

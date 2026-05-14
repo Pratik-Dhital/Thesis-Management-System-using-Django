@@ -19,8 +19,30 @@ def create_group(request):
     )
 
     current_student = Student.objects.get(
-    user=request.user
+        user=request.user
     )
+
+    config = GroupConfiguration.objects.first()
+
+    max_students = 1
+
+    if config:
+        max_students = config.max_students_per_group
+
+    existing_group = GroupMember.objects.filter(
+        student=current_student
+    ).first()
+
+    if existing_group:
+
+        messages.warning(
+            request,
+            "You are already in a group."
+        )
+
+        return redirect(
+            'student_dashboard'
+        )
 
     students = Student.objects.filter(
         department=current_student.department
@@ -31,7 +53,27 @@ def create_group(request):
     if request.method == 'POST':
 
         name = request.POST.get('name')
-        supervisor_id = request.POST.get('supervisor')
+
+        supervisor_id = request.POST.get(
+            'supervisor'
+        )
+
+        member_ids = request.POST.getlist(
+            'members'
+        )
+
+        total_members = len(member_ids)
+
+        if total_members > max_students:
+
+            messages.error(
+                request,
+                f"Maximum allowed students is {max_students}"
+            )
+
+            return redirect(
+                'create_group'
+            )
 
         supervisor = Lecturer.objects.get(
             id=supervisor_id
@@ -41,8 +83,6 @@ def create_group(request):
             name=name,
             supervisor=supervisor
         )
-
-        member_ids = request.POST.getlist('members')
 
         for member_id in member_ids:
 
@@ -55,11 +95,19 @@ def create_group(request):
                 student=student
             )
 
-        return redirect('student_dashboard')
+        messages.success(
+            request,
+            "Group created successfully"
+        )
+
+        return redirect(
+            'student_dashboard'
+        )
 
     context = {
         'supervisors': supervisors,
-        'students': students
+        'students': students,
+        'max_students': max_students
     }
 
     return render(
@@ -177,13 +225,9 @@ def review_proposal(request, proposal_id):
 
     if request.method == 'POST':
 
-        status_id = request.POST.get(
-            'status'
-        )
+        status_id = request.POST.get('status')
 
-        comment = request.POST.get(
-            'comment'
-        )
+        comment = request.POST.get('comment')
 
         selected_status = ThesisStatus.objects.get(
             id=status_id
@@ -199,8 +243,6 @@ def review_proposal(request, proposal_id):
 
         proposal.save()
 
-        # NOTIFICATION
-
         members = GroupMember.objects.filter(
             group=proposal.group
         )
@@ -211,18 +253,18 @@ def review_proposal(request, proposal_id):
                 user=member.student.user,
                 message=f"""
 Proposal '{proposal.title}'
-updated to status:
+status updated to:
 {selected_status.name}
 """
             )
 
         messages.success(
             request,
-            "Proposal updated successfully"
+            "Proposal reviewed successfully"
         )
 
         return redirect(
-            'pending_proposals'
+            'lecturer_proposals'
         )
 
     context = {
@@ -269,45 +311,47 @@ def supervisor_review(request, proposal_id):
         id=proposal_id
     )
 
+    statuses = ThesisStatus.objects.all()
+
     if request.method == 'POST':
 
-        action = request.POST.get('action')
+        status_id = request.POST.get('status')
 
         comment = request.POST.get('comment')
 
+        selected_status = ThesisStatus.objects.get(
+            id=status_id
+        )
+
+        proposal.status = selected_status
+
         proposal.supervisor_comment = comment
 
-        if action == 'approve':
+        proposal.save()
 
-            proposal.status = 'supervisor_approved'
+        if selected_status.name == "Supervisor Approved":
 
-            # CREATE THESIS AUTOMATICALLY
-
-            Thesis.objects.create(
-
+            thesis = Thesis.objects.create(
+                thesis=thesis,
+                
                 title=proposal.title,
 
                 proposal=proposal,
 
                 lecturer=proposal.reviewed_by_lecturer,
 
-                status=ThesisStatus.objects.get(
-                    name='Approved'
-                )
+                supervisor=proposal.group.supervisor,
+
+                status=selected_status
             )
-
-        else:
-
-            proposal.status = 'supervisor_rejected'
-
-        proposal.save()
 
         return redirect(
             'supervisor_pending'
         )
 
     context = {
-        'proposal': proposal
+        'proposal': proposal,
+        'statuses': statuses
     }
 
     return render(
@@ -396,5 +440,89 @@ def schedule_defense(request, thesis_id):
     return render(
         request,
         'thesis/schedule_defense.html',
+        context
+    )
+
+@login_required
+@lecturer_required
+def lecturer_groups(request):
+
+    lecturer = Lecturer.objects.get(
+        user=request.user
+    )
+
+    groups = ThesisGroup.objects.all()
+
+    context = {
+        'groups': groups
+    }
+
+    return render(
+        request,
+        'thesis/lecturer_groups.html',
+        context
+    )
+
+@login_required
+@lecturer_required
+def lecturer_group_detail(request, group_id):
+
+    lecturer = Lecturer.objects.get(
+        user=request.user
+    )
+
+    group = ThesisGroup.objects.get(
+        id=group_id
+    )
+
+    members = GroupMember.objects.filter(
+        group=group
+    )
+
+    proposal = Proposal.objects.filter(
+        group=group
+    ).first()
+
+    thesis = None
+
+    progress = None
+
+    documents = None
+
+    defense = None
+
+    if proposal:
+
+        thesis = Thesis.objects.filter(
+            proposal=proposal
+        ).first()
+
+    if thesis:
+
+        progress = ThesisProgress.objects.filter(
+            thesis=thesis
+        ).order_by('-created_at')
+
+        documents = ThesisDocument.objects.filter(
+            thesis=thesis
+        )
+
+        defense = Defense.objects.filter(
+            thesis=thesis
+        ).first()
+
+    context = {
+        'group': group,
+        'members': members,
+        'proposal': proposal,
+        'thesis': thesis,
+        'progress': progress,
+        'documents': documents,
+        'defense': defense
+    }
+
+    return render(
+        request,
+        'thesis/lecturer_group_detail.html',
         context
     )

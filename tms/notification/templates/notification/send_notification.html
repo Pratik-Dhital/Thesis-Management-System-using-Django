@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block start %}
+
+<div class="container py-4">
+
+    <div class="card shadow p-4">
+
+        <h2 class="mb-4">
+            Send Notification
+        </h2>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button class="btn btn-primary">
+
+                Send Notification
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

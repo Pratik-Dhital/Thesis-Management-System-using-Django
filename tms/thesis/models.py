@@ -163,3 +163,39 @@ class Defense(models.Model):
 
     def __str__(self):
         return self.thesis.title
+    
+class GroupConfiguration(models.Model):
+
+    max_students_per_group = models.PositiveIntegerField(
+        default=1
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f"Max Students: {self.max_students_per_group}"
+    
+class ThesisProgress(models.Model):
+
+    thesis = models.ForeignKey(
+        Thesis,
+        on_delete=models.CASCADE
+    )
+
+    title = models.CharField(
+        max_length=255
+    )
+
+    description = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.title

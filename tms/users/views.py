@@ -1,17 +1,17 @@
 from django.shortcuts import render, redirect
+from thesis.models import GroupMember
 from .models import Student, Lecturer
 from django.http import HttpResponse
 from django.contrib.auth import (get_user_model,authenticate,logout,login as auth_login)
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import (
-    StudentProfileForm,
-    LecturerProfileForm
-)
+from .forms import (StudentProfileForm, LecturerProfileForm)
 from notification.models import Notification
 from academics.models import Faculty, Department
 from django.contrib.auth.decorators import user_passes_test
 from users.decorators import student_required, lecturer_required
+from thesis.models import ThesisGroup
+from users.models import Student
 User = get_user_model()
 
 
@@ -134,9 +134,7 @@ def logout_view(request):
 def home(request):
     return render(request, "home.html" )
 
-
 # ================= DASHBOARDS =================
-
 
 @login_required
 @student_required
@@ -146,21 +144,24 @@ def student_dashboard(request):
         user=request.user
     )
 
-    if (
-        not student.roll_no or
-        not student.faculty or
-        not student.department or
-        not student.academic_level
-    ):
+    has_group = GroupMember.objects.filter(
+        student=student
+    ).exists()
 
-        return redirect(
-            'complete_student_profile'
-        )
+    context = {
+        'has_group': has_group
+    }
 
     return render(
         request,
-        "student/dashboard.html"
+        'student/dashboard.html',
+        context
     )
+
+
+from thesis.models import ThesisGroup
+from users.models import Student, Lecturer
+
 
 @login_required
 @lecturer_required
@@ -170,6 +171,7 @@ def lecturer_dashboard(request):
         user=request.user
     )
 
+    # PROFILE CHECK
     if (
         not lecturer.designation or
         not lecturer.faculty or
@@ -180,9 +182,28 @@ def lecturer_dashboard(request):
             'complete_lecturer_profile'
         )
 
+    # GROUPS UNDER THIS LECTURER
+    lecturer_groups = ThesisGroup.objects.filter(
+        supervisor=lecturer
+    )
+
+    # STUDENTS UNDER THIS LECTURER
+    students = Student.objects.filter(
+        groupmember__group__supervisor=lecturer
+    ).distinct()
+
+    context = {
+
+        'lecturer_groups': lecturer_groups,
+
+        'students': students
+
+    }
+
     return render(
         request,
-        "lecturer/dashboard.html"
+        "lecturer/dashboard.html",
+        context
     )
 
 # @login_required

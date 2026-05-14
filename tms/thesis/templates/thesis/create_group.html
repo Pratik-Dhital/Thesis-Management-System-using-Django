@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block start %}
+
+<div class="col-8 mx-auto card p-4 mt-5">
+
+    <h2>Create Thesis Group</h2>
+
+    <hr>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="mb-3">
+
+            <label>
+                Group Name
+            </label>
+
+            <input type="text" name="name" class="form-control" required>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label>
+                Select Supervisor
+            </label>
+
+            <select name="supervisor" class="form-control">
+
+                {% for supervisor in supervisors %}
+
+                <option value="{{ supervisor.id }}">
+                    {{ supervisor.full_name }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+        <div class="mb-3">
+
+            <h4 class="mt-4">
+                Select Members
+            </h4>
+
+            <p class="text-muted">
+                Maximum Allowed Members:
+                {{ max_students }}
+            </p>
+
+            {% for student in students %}
+
+            <div class="form-check">
+
+                <input type="checkbox" name="members" value="{{ student.id }}" class="form-check-input">
+
+                <label class="form-check-label">
+
+                    {{ student.full_name }}
+
+                </label>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Create Group
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
