@@ -1,7 +1,17 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import ProposalForm
-from .models import *
+from .models import (
+    ThesisGroup,
+    GroupMember,
+    Proposal,
+    Thesis,
+    ThesisStatus,
+    ThesisDocument,
+    ThesisProgress,
+    Defense,
+    GroupConfiguration
+)
 from users.models import Student, Lecturer
 from users.decorators import lecturer_required
 from django.contrib import messages
@@ -9,6 +19,7 @@ from django.utils import timezone
 from notification.models import Notification
 from .forms import ThesisDocumentForm
 from .forms import DefenseForm
+from django.shortcuts import get_object_or_404
 # Create your views here.
 
 @login_required
@@ -196,7 +207,7 @@ def pending_proposals(request):
     )
 
     proposals = Proposal.objects.filter(
-        status_name = 'pending'
+        status_name = 'Pending'
     )
 
     context = {
@@ -286,7 +297,7 @@ def supervisor_pending_proposals(request):
     )
 
     proposals = Proposal.objects.filter(
-        status_name='Lecturer Approved',
+        status__name='Lecturer Approved',
         group__supervisor=lecturer
     )
 
@@ -331,8 +342,7 @@ def supervisor_review(request, proposal_id):
 
         if selected_status.name == "Supervisor Approved":
 
-            thesis = Thesis.objects.create(
-                thesis=thesis,
+            Thesis.objects.create(
                 
                 title=proposal.title,
 
@@ -447,11 +457,18 @@ def schedule_defense(request, thesis_id):
 @lecturer_required
 def lecturer_groups(request):
 
+    # lecturer = Lecturer.objects.get(
+    #     user=request.user
+    # )
+
+    # groups = ThesisGroup.objects.all()
     lecturer = Lecturer.objects.get(
-        user=request.user
+    user=request.user
     )
 
-    groups = ThesisGroup.objects.all()
+    groups = ThesisGroup.objects.filter(
+    supervisor=lecturer
+    )
 
     context = {
         'groups': groups
@@ -471,10 +488,11 @@ def lecturer_group_detail(request, group_id):
         user=request.user
     )
 
-    group = ThesisGroup.objects.get(
+    group = get_object_or_404(
+        ThesisGroup,
         id=group_id
     )
-
+    
     members = GroupMember.objects.filter(
         group=group
     )
@@ -524,5 +542,100 @@ def lecturer_group_detail(request, group_id):
     return render(
         request,
         'thesis/lecturer_group_detail.html',
+        context
+    )
+
+@login_required
+@lecturer_required
+def notification_center(request):
+
+    lecturer = Lecturer.objects.get(
+        user=request.user
+    )
+
+    groups = ThesisGroup.objects.filter(
+        supervisor=lecturer
+    )
+
+    students = Student.objects.filter(
+        groupmember__group__supervisor=lecturer
+    ).distinct()
+
+    if request.method == "POST":
+
+        send_type = request.POST.get(
+            'send_type'
+        )
+
+        message = request.POST.get(
+            'message'
+        )
+
+        # ================= SEND TO GROUP =================
+
+        if send_type == "group":
+
+            group_id = request.POST.get(
+                'group_id'
+            )
+
+            group = ThesisGroup.objects.get(
+                id=group_id
+            )
+
+            members = GroupMember.objects.filter(
+                group=group
+            )
+
+            for member in members:
+
+                Notification.objects.create(
+
+                    user=member.student.user,
+
+                    message=message
+
+                )
+
+        # ================= SEND TO INDIVIDUAL STUDENT =================
+
+        else:
+
+            student_id = request.POST.get(
+                'student_id'
+            )
+
+            student = Student.objects.get(
+                id=student_id
+            )
+
+            Notification.objects.create(
+
+                user=student.user,
+
+                message=message
+
+            )
+
+        messages.success(
+            request,
+            "Notification sent successfully."
+        )
+
+        return redirect(
+            'notification_center'
+        )
+
+    context = {
+
+        'groups': groups,
+
+        'students': students
+
+    }
+
+    return render(
+        request,
+        'thesis/notification_center.html',
         context
     )

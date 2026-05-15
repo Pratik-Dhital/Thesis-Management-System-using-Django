@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block start %}
+
+<div class="container py-5">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-body p-5">
+
+            <h2 class="fw-bold mb-4">
+                Notification Center
+            </h2>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <!-- Send Type -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Send To
+                    </label>
+
+                    <select name="send_type"
+                            class="form-control"
+                            id="sendType">
+
+                        <option value="group">
+                            Group
+                        </option>
+
+                        <option value="student">
+                            Individual Student
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Group -->
+                <div class="mb-4" id="groupField">
+
+                    <label class="form-label fw-semibold">
+                        Select Group
+                    </label>
+
+                    <select name="group_id"
+                            class="form-control">
+
+                        {% for group in groups %}
+
+                        <option value="{{ group.id }}">
+                            {{ group.name }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <!-- Student -->
+                <div class="mb-4 d-none" id="studentField">
+
+                    <label class="form-label fw-semibold">
+                        Select Student
+                    </label>
+
+                    <select name="student_id"
+                            class="form-control">
+
+                        {% for student in students %}
+
+                        <option value="{{ student.id }}">
+                            {{ student.full_name }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <!-- Message -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Notification Message
+                    </label>
+
+                    <textarea name="message"
+                              class="form-control"
+                              rows="5"
+                              required></textarea>
+
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary rounded-pill px-4">
+
+                    Send Notification
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const sendType = document.getElementById('sendType');
+
+    const groupField = document.getElementById('groupField');
+
+    const studentField = document.getElementById('studentField');
+
+    sendType.addEventListener('change', function(){
+
+        if(this.value === 'group'){
+
+            groupField.classList.remove('d-none');
+
+            studentField.classList.add('d-none');
+
+        }
+
+        else{
+
+            studentField.classList.remove('d-none');
+
+            groupField.classList.add('d-none');
+
+        }
+
+    });
+
+</script>
+
+{% endblock %}
