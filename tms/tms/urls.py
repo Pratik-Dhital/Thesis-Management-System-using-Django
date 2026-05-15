@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from users.views import login_view, logout_view, student_dashboard,lecturer_dashboard, home, complete_lecturer_profile, complete_student_profile, admin_dashboard, create_user, manage_users, assign_role, manage_faculty, manage_department
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
     path('', home, name='home'),
     path('users/', include('users.urls')),
@@ -39,3 +41,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ]   
 
+if settings.DEBUG:
+
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )

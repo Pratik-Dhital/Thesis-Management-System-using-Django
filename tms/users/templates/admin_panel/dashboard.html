@@ -1,26 +1,300 @@
 {% extends "base.html" %}
+
 {% block start %}
 
-<h2>Admin Dashboard</h2>
+<div class="container py-4">
 
-<div class="mt-4">
+    <!-- Header Section -->
+    <div class="admin-header shadow-sm rounded-4 p-4 mb-5">
 
-    <a href="/admin-panel/create-user/" class="btn btn-primary">
-        Create User
-    </a>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
 
-    <a href="/admin-panel/manage-users/" class="btn btn-success">
-        Manage Users
-    </a>
+            <div>
+                <h1 class="fw-bold mb-2">
+                    Admin Dashboard
+                </h1>
 
-    <a href="/admin-panel/manage-faculty/" class="btn btn-warning">
-        Faculty
-    </a>
+                <p class="text-muted mb-0">
+                    Manage users, faculty members, departments, and system operations efficiently.
+                </p>
+            </div>
 
-    <a href="/admin-panel/manage-department/" class="btn btn-info">
-        Department
-    </a>
+            <div class="mt-3 mt-md-0">
+                <i class="bi bi-speedometer2 admin-icon"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Dashboard Cards -->
+    <div class="row g-4">
+
+        <!-- Create User -->
+        <div class="col-md-6 col-lg-3">
+
+            <div class="card dashboard-card border-0 shadow-lg h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="icon-box bg-primary-subtle text-primary mb-4">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+
+                    <h4 class="fw-bold">
+                        Create User
+                    </h4>
+
+                    <p class="text-muted">
+                        Add new students, lecturers, and administrators to the system.
+                    </p>
+
+                    <a href="/admin-panel/create-user/"
+                       class="btn btn-primary rounded-pill px-4">
+
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Create
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Manage Users -->
+        <div class="col-md-6 col-lg-3">
+
+            <div class="card dashboard-card border-0 shadow-lg h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="icon-box bg-success-subtle text-success mb-4">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+
+                    <h4 class="fw-bold">
+                        Manage Users
+                    </h4>
+
+                    <p class="text-muted">
+                        View, edit, activate, or remove user accounts and permissions.
+                    </p>
+
+                    <a href="/admin-panel/manage-users/"
+                       class="btn btn-success rounded-pill px-4">
+
+                        <i class="bi bi-gear-fill me-2"></i>
+                        Manage
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Faculty -->
+        <div class="col-md-6 col-lg-3">
+
+            <div class="card dashboard-card border-0 shadow-lg h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="icon-box bg-warning-subtle text-warning mb-4">
+                        <i class="bi bi-person-workspace"></i>
+                    </div>
+
+                    <h4 class="fw-bold">
+                        Faculty
+                    </h4>
+
+                    <p class="text-muted">
+                        Manage faculty records, supervisors, and academic staff.
+                    </p>
+
+                    <a href="/admin-panel/manage-faculty/"
+                       class="btn btn-warning text-dark rounded-pill px-4">
+
+                        <i class="bi bi-building me-2"></i>
+                        Faculty
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Department -->
+        <div class="col-md-6 col-lg-3">
+
+            <div class="card dashboard-card border-0 shadow-lg h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="icon-box bg-info-subtle text-info mb-4">
+                        <i class="bi bi-diagram-3-fill"></i>
+                    </div>
+
+                    <h4 class="fw-bold">
+                        Department
+                    </h4>
+
+                    <p class="text-muted">
+                        Organize and manage academic departments and related data.
+                    </p>
+
+                    <a href="/admin-panel/manage-department/"
+                       class="btn btn-info text-white rounded-pill px-4">
+
+                        <i class="bi bi-folder-fill me-2"></i>
+                        Department
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Quick Statistics -->
+    <div class="row mt-5 g-4">
+
+        <div class="col-md-3">
+
+            <div class="stats-card shadow-sm rounded-4 p-4 text-center">
+
+                <h2 class="fw-bold text-primary">
+                    120
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Total Users
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="stats-card shadow-sm rounded-4 p-4 text-center">
+
+                <h2 class="fw-bold text-success">
+                    35
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Faculty Members
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="stats-card shadow-sm rounded-4 p-4 text-center">
+
+                <h2 class="fw-bold text-warning">
+                    10
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Departments
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="stats-card shadow-sm rounded-4 p-4 text-center">
+
+                <h2 class="fw-bold text-info">
+                    87
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Active Theses
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
+
+
+<!-- Custom Styling -->
+<style>
+
+    body{
+        background: linear-gradient(to bottom right, #f5f7ff, #eef2ff);
+    }
+
+    .admin-header{
+        background: white;
+    }
+
+    .admin-icon{
+        font-size: 5rem;
+        color: #0d6efd;
+    }
+
+    .dashboard-card{
+        border-radius: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card:hover{
+        transform: translateY(-8px);
+    }
+
+    .icon-box{
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+        font-size: 2.5rem;
+    }
+
+    .stats-card{
+        background: white;
+        transition: 0.3s ease;
+    }
+
+    .stats-card:hover{
+        transform: scale(1.03);
+    }
+
+    .rounded-4{
+        border-radius: 1.2rem;
+    }
+
+</style>
+
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 {% endblock %}

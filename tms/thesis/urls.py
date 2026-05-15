@@ -6,10 +6,6 @@ from .views import (
     lecturer_proposals,
     review_proposal,
     pending_proposals,
-    supervisor_pending_proposals,
-    supervisor_review,
-    upload_thesis_document,
-    schedule_defense,
     lecturer_groups,
     lecturer_group_detail,
     notification_center,
@@ -23,9 +19,5 @@ urlpatterns = [
     path('lecturer/pending/', pending_proposals, name='pending_proposals'),
     path('lecturer/groups/', lecturer_groups, name='lecturer_groups'),
     path('lecturer/group/<int:group_id>/', lecturer_group_detail, name='lecturer_group_detail'),
-    path(
-    'notification-center/',
-    notification_center,
-    name='notification_center'
-),
+    path('notification-center/', notification_center, name='notification_center'),
 ]

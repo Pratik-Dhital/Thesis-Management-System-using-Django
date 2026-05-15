@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import ProposalForm
@@ -35,7 +37,7 @@ def create_group(request):
 
     config = GroupConfiguration.objects.first()
 
-    max_students = 1
+    max_students = 4
 
     if config:
         max_students = config.max_students_per_group
@@ -227,13 +229,23 @@ def review_proposal(request, proposal_id):
     lecturer = Lecturer.objects.get(
         user=request.user
     )
+    if not lecturer.is_supervisor:
+        messages.error(
+            request,
+            "Only supervisors can review proposals."
+        )
+
+        return redirect(
+            'lecturer_proposals'
+        )
+
 
     proposal = Proposal.objects.get(
         id=proposal_id
     )
 
     statuses = ThesisStatus.objects.all()
-
+    
     if request.method == 'POST':
 
         status_id = request.POST.get('status')
@@ -290,15 +302,29 @@ status updated to:
     )
 
 @login_required
+@lecturer_required
 def supervisor_pending_proposals(request):
 
     lecturer = Lecturer.objects.get(
         user=request.user
     )
 
+    # only supervisors allowed
+    if not lecturer.is_supervisor:
+
+        messages.error(
+            request,
+            "You are not assigned as a supervisor."
+        )
+
+        return redirect(
+            'lecturer_dashboard'
+        )
+
     proposals = Proposal.objects.filter(
-        status__name='Lecturer Approved',
         group__supervisor=lecturer
+    ).exclude(
+        status__name='Rejected'
     )
 
     context = {
@@ -414,6 +440,20 @@ def upload_thesis_document(request, thesis_id):
 
 @login_required
 def schedule_defense(request, thesis_id):
+    lecturer = Lecturer.objects.get(
+    user=request.user
+    )
+
+    if not lecturer.is_supervisor:
+
+        messages.error(
+            request,
+            "Only supervisors can schedule defenses."
+        )
+
+        return redirect(
+            'lecturer_dashboard'
+        )
 
     thesis = Thesis.objects.get(
         id=thesis_id
@@ -456,12 +496,6 @@ def schedule_defense(request, thesis_id):
 @login_required
 @lecturer_required
 def lecturer_groups(request):
-
-    # lecturer = Lecturer.objects.get(
-    #     user=request.user
-    # )
-
-    # groups = ThesisGroup.objects.all()
     lecturer = Lecturer.objects.get(
     user=request.user
     )
@@ -490,7 +524,7 @@ def lecturer_group_detail(request, group_id):
 
     group = get_object_or_404(
         ThesisGroup,
-        id=group_id
+        id=group_id, supervisor=lecturer
     )
     
     members = GroupMember.objects.filter(
