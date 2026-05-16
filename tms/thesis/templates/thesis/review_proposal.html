@@ -14,13 +14,23 @@
             {{ proposal.status.name }}
         </strong>
     </p>
+    {% if proposal.document %}
 
-    <a href="{{ proposal.document.url }}" target="_blank"
-       class="btn btn-info">
+    <a href="{{ proposal.document.url }}" target="_blank" class="btn btn-info">
 
-       View Document
+        View Document
 
     </a>
+
+    {% else %}
+
+    <div class="alert alert-warning mt-3">
+
+        No document uploaded.
+
+    </div>
+
+    {% endif %}
 
     <form method="POST" class="mt-4">
 
@@ -28,10 +38,7 @@
 
         <label>Select Status</label>
 
-        <select
-            name="status"
-            class="form-control"
-        >
+        <select name="status" class="form-control">
 
             {% for status in statuses %}
 
@@ -45,11 +52,7 @@
 
         </select>
 
-        <textarea
-            name="comment"
-            class="form-control mt-3"
-            placeholder="Comment"
-        ></textarea>
+        <textarea name="comment" class="form-control mt-3" placeholder="Comment"></textarea>
 
         <button class="btn btn-success mt-3">
 

@@ -57,7 +57,7 @@
             {{ proposal.status.name }}
         </p>
 
-        <a href="{{ proposal.document.url }}" class="btn btn-info">
+        <a href="{{ proposal.document.url }}" class="btn btn-info" target="_blank">
 
             View Proposal
 
@@ -125,11 +125,23 @@
 
     <div class="card p-3 mb-2">
 
+        {% if document.file %}
+
         <a href="{{ document.file.url }}" target="_blank">
 
             Open Document
 
         </a>
+
+        {% else %}
+
+        <span class="text-danger">
+
+            File Missing
+
+        </span>
+
+        {% endif %}
 
     </div>
 
@@ -184,8 +196,7 @@
 
     <hr>
 
-    <a href="{% url 'notification_center' %}">
-        class="btn btn-primary">
+    <a href="{% url 'notification_center' %}" class="btn btn-primary">
 
         Send Notification
 
