@@ -25,7 +25,7 @@ class ThesisGroup(models.Model):
 
 
 class Proposal(models.Model):
-    group = models.ForeignKey(
+    group = models.OneToOneField(
         'ThesisGroup',
         on_delete=models.CASCADE
     )

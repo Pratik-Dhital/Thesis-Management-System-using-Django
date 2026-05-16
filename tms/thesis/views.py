@@ -1,4 +1,4 @@
-from urllib import request
+from turtle import title
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -75,7 +75,7 @@ def create_group(request):
             'members'
         )
 
-        total_members = len(member_ids)
+        total_members = len(selected_members)
 
         if total_members > max_students:
 
@@ -209,7 +209,7 @@ def pending_proposals(request):
     )
 
     proposals = Proposal.objects.filter(
-        status_name = 'Pending'
+        status__name = 'Pending'
     )
 
     context = {
@@ -229,6 +229,7 @@ def review_proposal(request, proposal_id):
     lecturer = Lecturer.objects.get(
         user=request.user
     )
+    
     if not lecturer.is_supervisor:
         messages.error(
             request,
@@ -240,8 +241,10 @@ def review_proposal(request, proposal_id):
         )
 
 
-    proposal = Proposal.objects.get(
-        id=proposal_id
+    proposal = get_object_or_404(
+        Proposal,
+        id=proposal_id,
+        group__supervisor=lecturer
     )
 
     statuses = ThesisStatus.objects.all()
@@ -344,9 +347,11 @@ def supervisor_review(request, proposal_id):
         user=request.user
     )
 
-    proposal = Proposal.objects.get(
-        id=proposal_id
-    )
+    proposal = get_object_or_404(
+        Proposal,
+        id=proposal_id,
+        group__supervisor=lecturer
+    )   
 
     statuses = ThesisStatus.objects.all()
 
@@ -369,16 +374,20 @@ def supervisor_review(request, proposal_id):
         if selected_status.name == "Supervisor Approved":
 
             Thesis.objects.create(
-                
-                title=proposal.title,
 
                 proposal=proposal,
 
-                lecturer=proposal.reviewed_by_lecturer,
+                defaults = {
+                
+                    'title' : proposal.title,
 
-                supervisor=proposal.group.supervisor,
+                    'lecturer' : proposal.reviewed_by_lecturer,
 
-                status=selected_status
+                    'supervisor ':proposal.group.supervisor,
+
+                    'status' :selected_status
+
+                }
             )
 
         return redirect(

@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from thesis.models import GroupMember
 from .models import Student, Lecturer
-from django.http import HttpResponse
 from django.contrib.auth import (get_user_model,authenticate,logout,login as auth_login)
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required

@@ -4,5 +4,5 @@ from .models import User, Student, Lecturer
 admin.site.register(User)
 admin.site.register(Student)
 admin.site.register(Lecturer)
-# admin.site.register(Supervisor)
+
 
