@@ -1,8 +1,9 @@
-from turtle import title
-
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .forms import ProposalForm
+from django.contrib import messages
+from django.utils import timezone
+
+from .forms import ProposalForm, ThesisDocumentForm, DefenseForm
 from .models import (
     ThesisGroup,
     GroupMember,
@@ -14,19 +15,17 @@ from .models import (
     Defense,
     GroupConfiguration
 )
+
 from users.models import Student, Lecturer
 from users.decorators import lecturer_required
-from django.contrib import messages
-from django.utils import timezone
 from notification.models import Notification
-from .forms import ThesisDocumentForm
-from .forms import DefenseForm
-from django.shortcuts import get_object_or_404
-# Create your views here.
 
+
+# ============================================
+# CREATE GROUP
+# ============================================
 @login_required
 def create_group(request):
-
     supervisors = Lecturer.objects.filter(
         is_supervisor=True
     )
@@ -36,7 +35,6 @@ def create_group(request):
     )
 
     config = GroupConfiguration.objects.first()
-
     max_students = 4
 
     if config:
@@ -47,12 +45,10 @@ def create_group(request):
     ).first()
 
     if existing_group:
-
         messages.warning(
             request,
             "You are already in a group."
         )
-
         return redirect(
             'student_dashboard'
         )
@@ -64,8 +60,9 @@ def create_group(request):
     )
 
     if request.method == 'POST':
-
-        name = request.POST.get('name')
+        name = request.POST.get(
+            'name'
+        )
 
         supervisor_id = request.POST.get(
             'supervisor'
@@ -75,15 +72,25 @@ def create_group(request):
             'members'
         )
 
-        total_members = len(selected_members)
+        # Include current student automatically
+        selected_members = list(
+            member_ids
+        )
+
+        if str(current_student.id) not in selected_members:
+            selected_members.append(
+                str(current_student.id)
+            )
+
+        total_members = len(
+            selected_members
+        )
 
         if total_members > max_students:
-
             messages.error(
                 request,
                 f"Maximum allowed students is {max_students}"
             )
-
             return redirect(
                 'create_group'
             )
@@ -97,8 +104,7 @@ def create_group(request):
             supervisor=supervisor
         )
 
-        for member_id in member_ids:
-
+        for member_id in selected_members:
             student = Student.objects.get(
                 id=member_id
             )
@@ -129,10 +135,12 @@ def create_group(request):
         context
     )
 
-# ================= SUBMIT PROPOSAL =================
+
+# ============================================
+# SUBMIT PROPOSAL
+# ============================================
 @login_required
 def submit_proposal(request):
-
     student = Student.objects.get(
         user=request.user
     )
@@ -142,23 +150,22 @@ def submit_proposal(request):
     ).first()
 
     if not group:
-        return redirect('create_group')
+        return redirect(
+            'create_group'
+        )
 
     if request.method == 'POST':
-
         form = ProposalForm(
             request.POST,
             request.FILES
         )
 
         if form.is_valid():
-
             proposal = form.save(
                 commit=False
             )
 
             proposal.group = group
-
             proposal.status = ThesisStatus.objects.get(
                 name='Pending'
             )
@@ -168,9 +175,7 @@ def submit_proposal(request):
             return redirect(
                 'student_dashboard'
             )
-
     else:
-
         form = ProposalForm()
 
     context = {
@@ -183,10 +188,13 @@ def submit_proposal(request):
         context
     )
 
+
+# ============================================
+# LECTURER PROPOSALS
+# ============================================
 @login_required
 @lecturer_required
 def lecturer_proposals(request):
-
     proposals = Proposal.objects.filter(
         status__name='Pending'
     )
@@ -201,15 +209,11 @@ def lecturer_proposals(request):
         context
     )
 
+
 @login_required
 def pending_proposals(request):
-
-    lecturer = Lecturer.objects.get(
-        user=request.user
-    )
-
     proposals = Proposal.objects.filter(
-        status__name = 'Pending'
+        status__name='Pending'
     )
 
     context = {
@@ -222,24 +226,25 @@ def pending_proposals(request):
         context
     )
 
+
+# ============================================
+# REVIEW PROPOSAL
+# ============================================
 @login_required
 @lecturer_required
 def review_proposal(request, proposal_id):
-
     lecturer = Lecturer.objects.get(
         user=request.user
     )
-    
+
     if not lecturer.is_supervisor:
         messages.error(
             request,
             "Only supervisors can review proposals."
         )
-
         return redirect(
             'lecturer_proposals'
         )
-
 
     proposal = get_object_or_404(
         Proposal,
@@ -248,25 +253,24 @@ def review_proposal(request, proposal_id):
     )
 
     statuses = ThesisStatus.objects.all()
-    
+
     if request.method == 'POST':
+        status_id = request.POST.get(
+            'status'
+        )
 
-        status_id = request.POST.get('status')
-
-        comment = request.POST.get('comment')
+        comment = request.POST.get(
+            'comment'
+        )
 
         selected_status = ThesisStatus.objects.get(
             id=status_id
         )
 
         proposal.status = selected_status
-
         proposal.lecturer_comment = comment
-
         proposal.reviewed_by_lecturer = lecturer
-
         proposal.reviewed_at = timezone.now()
-
         proposal.save()
 
         members = GroupMember.objects.filter(
@@ -274,7 +278,6 @@ def review_proposal(request, proposal_id):
         )
 
         for member in members:
-
             Notification.objects.create(
                 user=member.student.user,
                 message=f"""
@@ -304,91 +307,81 @@ status updated to:
         context
     )
 
+
+# ============================================
+# SUPERVISOR REVIEW
+# ============================================
 @login_required
 @lecturer_required
-def supervisor_pending_proposals(request):
-
+def supervisor_review(request, proposal_id):
     lecturer = Lecturer.objects.get(
         user=request.user
     )
 
-    # only supervisors allowed
     if not lecturer.is_supervisor:
-
         messages.error(
             request,
-            "You are not assigned as a supervisor."
+            "Only supervisors can review proposals."
         )
-
         return redirect(
             'lecturer_dashboard'
         )
-
-    proposals = Proposal.objects.filter(
-        group__supervisor=lecturer
-    ).exclude(
-        status__name='Rejected'
-    )
-
-    context = {
-        'proposals': proposals
-    }
-
-    return render(
-        request,
-        'thesis/supervisor_pending.html',
-        context
-    )
-
-@login_required
-def supervisor_review(request, proposal_id):
-
-    lecturer = Lecturer.objects.get(
-        user=request.user
-    )
 
     proposal = get_object_or_404(
         Proposal,
         id=proposal_id,
         group__supervisor=lecturer
-    )   
+    )
 
     statuses = ThesisStatus.objects.all()
 
     if request.method == 'POST':
+        status_id = request.POST.get(
+            'status'
+        )
 
-        status_id = request.POST.get('status')
-
-        comment = request.POST.get('comment')
+        comment = request.POST.get(
+            'comment'
+        )
 
         selected_status = ThesisStatus.objects.get(
             id=status_id
         )
 
         proposal.status = selected_status
-
         proposal.supervisor_comment = comment
-
         proposal.save()
 
-        if selected_status.name == "Supervisor Approved":
-
-            Thesis.objects.create(
-
+        if selected_status.name == "Approved":
+            Thesis.objects.get_or_create(
                 proposal=proposal,
-
-                defaults = {
-                
-                    'title' : proposal.title,
-
-                    'lecturer' : proposal.reviewed_by_lecturer,
-
-                    'supervisor ':proposal.group.supervisor,
-
-                    'status' :selected_status
-
+                defaults={
+                    'title': proposal.title,
+                    'lecturer': proposal.reviewed_by_lecturer,
+                    'supervisor': proposal.group.supervisor,
+                    'status': selected_status
                 }
             )
+
+        members = GroupMember.objects.filter(
+            group=proposal.group
+        )
+
+        for member in members:
+            Notification.objects.create(
+                user=member.student.user,
+                message=f"""
+Proposal '{proposal.title}'
+updated to:
+{selected_status.name}
+""",
+                sent_by=request.user
+            )
+
+        messages.success(
+            request,
+            "Proposal reviewed successfully."
+        )
 
         return redirect(
             'supervisor_pending'
@@ -405,40 +398,79 @@ def supervisor_review(request, proposal_id):
         context
     )
 
+
+# ============================================
+# UPLOAD THESIS DOCUMENT
+# ============================================
 @login_required
 def upload_thesis_document(request, thesis_id):
-
-    thesis = Thesis.objects.get(
+    thesis = get_object_or_404(
+        Thesis,
         id=thesis_id
     )
 
-    if request.method == 'POST':
+    if request.user.role == 'student':
+        student = Student.objects.get(
+            user=request.user
+        )
 
+        is_member = GroupMember.objects.filter(
+            group=thesis.proposal.group,
+            student=student
+        ).exists()
+
+        if not is_member:
+            messages.error(
+                request,
+                "You are not allowed to upload documents."
+            )
+            return redirect(
+                'student_dashboard'
+            )
+
+    elif request.user.role == 'lecturer':
+        lecturer = Lecturer.objects.get(
+            user=request.user
+        )
+
+        if thesis.supervisor != lecturer:
+            messages.error(
+                request,
+                "You are not assigned to this thesis."
+            )
+            return redirect(
+                'lecturer_dashboard'
+            )
+
+    if request.method == 'POST':
         form = ThesisDocumentForm(
             request.POST,
             request.FILES
         )
 
         if form.is_valid():
-
             document = form.save(
                 commit=False
             )
 
             document.thesis = thesis
-
             document.save()
 
-            return redirect(
-                'student_dashboard'
+            messages.success(
+                request,
+                "Document uploaded successfully."
             )
 
+            return redirect(
+                'lecturer_group_detail',
+                group_id=thesis.proposal.group.id
+            )
     else:
-
         form = ThesisDocumentForm()
 
     context = {
-        'form': form
+        'form': form,
+        'thesis': thesis
     }
 
     return render(
@@ -447,14 +479,16 @@ def upload_thesis_document(request, thesis_id):
         context
     )
 
+# ============================================
+# SCHEDULE DEFENSE
+# ============================================
 @login_required
 def schedule_defense(request, thesis_id):
     lecturer = Lecturer.objects.get(
-    user=request.user
+        user=request.user
     )
 
     if not lecturer.is_supervisor:
-
         messages.error(
             request,
             "Only supervisors can schedule defenses."
@@ -464,32 +498,34 @@ def schedule_defense(request, thesis_id):
             'lecturer_dashboard'
         )
 
-    thesis = Thesis.objects.get(
+    thesis = get_object_or_404(
+        Thesis,
         id=thesis_id
     )
 
     if request.method == 'POST':
-
         form = DefenseForm(
             request.POST
         )
 
         if form.is_valid():
-
             defense = form.save(
                 commit=False
             )
 
             defense.thesis = thesis
-
             defense.save()
+
+            messages.success(
+                request,
+                "Defense scheduled successfully."
+            )
 
             return redirect(
                 'lecturer_dashboard'
             )
 
     else:
-
         form = DefenseForm()
 
     context = {
@@ -502,15 +538,19 @@ def schedule_defense(request, thesis_id):
         context
     )
 
+
+# ============================================
+# LECTURER GROUPS
+# ============================================
 @login_required
 @lecturer_required
 def lecturer_groups(request):
     lecturer = Lecturer.objects.get(
-    user=request.user
+        user=request.user
     )
 
     groups = ThesisGroup.objects.filter(
-    supervisor=lecturer
+        supervisor=lecturer
     )
 
     context = {
@@ -523,19 +563,23 @@ def lecturer_groups(request):
         context
     )
 
+
+# ============================================
+# LECTURER GROUP DETAIL
+# ============================================
 @login_required
 @lecturer_required
 def lecturer_group_detail(request, group_id):
-
     lecturer = Lecturer.objects.get(
         user=request.user
     )
 
     group = get_object_or_404(
         ThesisGroup,
-        id=group_id, supervisor=lecturer
+        id=group_id,
+        supervisor=lecturer
     )
-    
+
     members = GroupMember.objects.filter(
         group=group
     )
@@ -545,24 +589,21 @@ def lecturer_group_detail(request, group_id):
     ).first()
 
     thesis = None
-
     progress = None
-
     documents = None
-
     defense = None
 
     if proposal:
-
         thesis = Thesis.objects.filter(
             proposal=proposal
         ).first()
 
     if thesis:
-
         progress = ThesisProgress.objects.filter(
             thesis=thesis
-        ).order_by('-created_at')
+        ).order_by(
+            '-created_at'
+        )
 
         documents = ThesisDocument.objects.filter(
             thesis=thesis
@@ -588,10 +629,13 @@ def lecturer_group_detail(request, group_id):
         context
     )
 
+
+# ============================================
+# NOTIFICATION CENTER
+# ============================================
 @login_required
 @lecturer_required
 def notification_center(request):
-
     lecturer = Lecturer.objects.get(
         user=request.user
     )
@@ -605,7 +649,6 @@ def notification_center(request):
     ).distinct()
 
     if request.method == "POST":
-
         send_type = request.POST.get(
             'send_type'
         )
@@ -615,9 +658,7 @@ def notification_center(request):
         )
 
         # ================= SEND TO GROUP =================
-
         if send_type == "group":
-
             group_id = request.POST.get(
                 'group_id'
             )
@@ -631,19 +672,13 @@ def notification_center(request):
             )
 
             for member in members:
-
                 Notification.objects.create(
-
                     user=member.student.user,
-
                     message=message
-
                 )
 
         # ================= SEND TO INDIVIDUAL STUDENT =================
-
         else:
-
             student_id = request.POST.get(
                 'student_id'
             )
@@ -653,11 +688,8 @@ def notification_center(request):
             )
 
             Notification.objects.create(
-
                 user=student.user,
-
                 message=message
-
             )
 
         messages.success(
@@ -670,15 +702,72 @@ def notification_center(request):
         )
 
     context = {
-
         'groups': groups,
-
         'students': students
-
     }
 
     return render(
         request,
         'thesis/notification_center.html',
+        context
+    )
+
+
+# ============================================
+# LECTURER COMMENT ON PROPOSAL
+# ============================================
+@login_required
+@lecturer_required
+def lecturer_comment_proposal(request, proposal_id):
+    lecturer = Lecturer.objects.get(
+        user=request.user
+    )
+
+    proposal = get_object_or_404(
+        Proposal,
+        id=proposal_id
+    )
+
+    if request.method == 'POST':
+        comment = request.POST.get(
+            'comment'
+        )
+
+        proposal.lecturer_comment = comment
+        proposal.reviewed_by_lecturer = lecturer
+        proposal.reviewed_at = timezone.now()
+
+        proposal.save()
+
+        members = GroupMember.objects.filter(
+            group=proposal.group
+        )
+
+        for member in members:
+            Notification.objects.create(
+                user=member.student.user,
+                message=f"""
+Lecturer commented on proposal:
+{proposal.title}
+""",
+                sent_by=request.user
+            )
+
+        messages.success(
+            request,
+            "Comment added successfully."
+        )
+
+        return redirect(
+            'lecturer_proposals'
+        )
+
+    context = {
+        'proposal': proposal
+    }
+
+    return render(
+        request,
+        'thesis/lecturer_comment.html',
         context
     )

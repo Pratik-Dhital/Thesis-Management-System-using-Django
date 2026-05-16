@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     create_group,
+    lecturer_comment_proposal,
     submit_proposal,
     lecturer_proposals,
     review_proposal,
@@ -9,6 +10,7 @@ from .views import (
     lecturer_groups,
     lecturer_group_detail,
     notification_center,
+    supervisor_review,
 )
 
 urlpatterns = [
@@ -19,5 +21,9 @@ urlpatterns = [
     path('lecturer/pending/', pending_proposals, name='pending_proposals'),
     path('lecturer/groups/', lecturer_groups, name='lecturer_groups'),
     path('lecturer/group/<int:group_id>/', lecturer_group_detail, name='lecturer_group_detail'),
+    
     path('notification-center/', notification_center, name='notification_center'),
+    path('lecturer/comment/<int:proposal_id>/',lecturer_comment_proposal,name='lecturer_comment_proposal'),
+    path('supervisor/review/<int:proposal_id>/',supervisor_review,name='supervisor_review'),
 ]
+

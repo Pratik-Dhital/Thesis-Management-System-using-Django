@@ -57,8 +57,7 @@
             {{ proposal.status.name }}
         </p>
 
-        <a href="{{ proposal.document.url }}"
-           class="btn btn-info">
+        <a href="{{ proposal.document.url }}" class="btn btn-info">
 
             View Proposal
 
@@ -84,25 +83,25 @@
 
     {% if progress %}
 
-        {% for item in progress %}
+    {% for item in progress %}
 
-        <div class="card p-3 mb-2">
+    <div class="card p-3 mb-2">
 
-            <h5>
-                {{ item.title }}
-            </h5>
+        <h5>
+            {{ item.title }}
+        </h5>
 
-            <p>
-                {{ item.description }}
-            </p>
+        <p>
+            {{ item.description }}
+        </p>
 
-            <small>
-                {{ item.created_at }}
-            </small>
+        <small>
+            {{ item.created_at }}
+        </small>
 
-        </div>
+    </div>
 
-        {% endfor %}
+    {% endfor %}
 
     {% else %}
 
@@ -122,20 +121,19 @@
 
     {% if documents %}
 
-        {% for document in documents %}
+    {% for document in documents %}
 
-        <div class="card p-3 mb-2">
+    <div class="card p-3 mb-2">
 
-            <a href="{{ document.file.url }}"
-               target="_blank">
+        <a href="{{ document.file.url }}" target="_blank">
 
-                Open Document
+            Open Document
 
-            </a>
+        </a>
 
-        </div>
+    </div>
 
-        {% endfor %}
+    {% endfor %}
 
     {% else %}
 
@@ -187,7 +185,7 @@
     <hr>
 
     <a href="{% url 'notification_center' %}">
-       class="btn btn-primary">
+        class="btn btn-primary">
 
         Send Notification
 
