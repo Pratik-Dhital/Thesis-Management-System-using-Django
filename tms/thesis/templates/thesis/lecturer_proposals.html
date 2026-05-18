@@ -8,9 +8,13 @@
 
 <div class="card p-3 mt-3">
 
+    <h5>Version {{ proposal.version }}</h5>
+
     <h4>{{ proposal.title }}</h4>
 
     <p>{{ proposal.description }}</p>
+
+    <p>Status: {{ proposal.status.name }}</p>
 
     <a href="{% url 'review_proposal' proposal.id %}"
        class="btn btn-primary">

@@ -38,5 +38,35 @@ class DefenseForm(forms.ModelForm):
         fields = [
             'date',
             'time',
-            'venue'
+            'venue',
+            'submission_deadline'
         ]
+        widgets = {
+
+            'date': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control'
+                }
+            ),
+
+            'time': forms.TimeInput(
+                attrs={
+                    'type': 'time',
+                    'class': 'form-control'
+                }
+            ),
+
+            'submission_deadline': forms.DateTimeInput(
+                attrs={
+                    'type': 'datetime-local',
+                    'class': 'form-control'
+                }
+            ),
+
+            'venue': forms.TextInput(
+                attrs={
+                    'class': 'form-control'
+                }
+            )
+        }

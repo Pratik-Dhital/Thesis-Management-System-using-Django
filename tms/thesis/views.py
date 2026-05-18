@@ -178,6 +178,30 @@ def submit_proposal(request):
     else:
         form = ProposalForm()
 
+    defense = Defense.objects.filter(
+    group=group
+).first()
+    
+    last_version = Proposal.objects.filter(
+        group=group
+    ).count()
+
+    proposal.version = last_version + 1
+
+    if defense:
+
+        if timezone.now() > defense.submission_deadline:
+
+            messages.error(
+                request,
+                "Submission deadline exceeded."
+            )
+
+            return redirect(
+                'student_dashboard'
+            )
+        
+
     context = {
         'form': form
     }
@@ -233,15 +257,18 @@ def pending_proposals(request):
 @login_required
 @lecturer_required
 def review_proposal(request, proposal_id):
+
     lecturer = Lecturer.objects.get(
         user=request.user
     )
 
     if not lecturer.is_supervisor:
+
         messages.error(
             request,
             "Only supervisors can review proposals."
         )
+
         return redirect(
             'lecturer_proposals'
         )
@@ -249,12 +276,13 @@ def review_proposal(request, proposal_id):
     proposal = get_object_or_404(
         Proposal,
         id=proposal_id,
-        group__supervisor=lecturer
+        group__supervisor__user=request.user
     )
 
     statuses = ThesisStatus.objects.all()
 
     if request.method == 'POST':
+
         status_id = request.POST.get(
             'status'
         )
@@ -271,6 +299,7 @@ def review_proposal(request, proposal_id):
         proposal.lecturer_comment = comment
         proposal.reviewed_by_lecturer = lecturer
         proposal.reviewed_at = timezone.now()
+
         proposal.save()
 
         members = GroupMember.objects.filter(
@@ -278,6 +307,7 @@ def review_proposal(request, proposal_id):
         )
 
         for member in members:
+
             Notification.objects.create(
                 user=member.student.user,
                 message=f"""
@@ -306,8 +336,6 @@ status updated to:
         'thesis/review_proposal.html',
         context
     )
-
-
 # ============================================
 # SUPERVISOR REVIEW
 # ============================================
@@ -514,6 +542,7 @@ def schedule_defense(request, thesis_id):
             )
 
             defense.thesis = thesis
+            defense.scheduled_by = lecturer
             defense.save()
 
             messages.success(
@@ -522,14 +551,16 @@ def schedule_defense(request, thesis_id):
             )
 
             return redirect(
-                'lecturer_dashboard'
+                # 'lecturer_dashboard'
+                lecturer_group_detail,thesis.proposal.group.id
             )
 
     else:
         form = DefenseForm()
 
     context = {
-        'form': form
+        'form': form,
+        'thesis': thesis
     }
 
     return render(
@@ -586,7 +617,7 @@ def lecturer_group_detail(request, group_id):
 
     proposal = Proposal.objects.filter(
         group=group
-    ).first()
+    ).order_by('-submitted_at').first()
 
     thesis = None
     progress = None
@@ -769,5 +800,42 @@ Lecturer commented on proposal:
     return render(
         request,
         'thesis/lecturer_comment.html',
+        context
+    )
+
+@login_required
+# @student_required
+def proposal_history(request):
+
+    student = Student.objects.get(
+        user=request.user
+    )
+
+    member = GroupMember.objects.filter(
+        student=student
+    ).first()
+
+    if not member:
+
+        messages.error(
+            request,
+            "No group found."
+        )
+
+        return redirect(
+            'student_dashboard'
+        )
+
+    proposals = Proposal.objects.filter(
+        group=member.group
+    ).order_by('-submitted_at')
+
+    context = {
+        'proposals': proposals
+    }
+
+    return render(
+        request,
+        'thesis/proposal_history.html',
         context
     )

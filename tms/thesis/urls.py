@@ -1,8 +1,11 @@
 from django.urls import path
 
+from notification import views
+
 from .views import (
     create_group,
     lecturer_comment_proposal,
+    schedule_defense,
     submit_proposal,
     lecturer_proposals,
     review_proposal,
@@ -21,9 +24,9 @@ urlpatterns = [
     path('lecturer/pending/', pending_proposals, name='pending_proposals'),
     path('lecturer/groups/', lecturer_groups, name='lecturer_groups'),
     path('lecturer/group/<int:group_id>/', lecturer_group_detail, name='lecturer_group_detail'),
-    
     path('notification-center/', notification_center, name='notification_center'),
     path('lecturer/comment/<int:proposal_id>/',lecturer_comment_proposal,name='lecturer_comment_proposal'),
     path('supervisor/review/<int:proposal_id>/',supervisor_review,name='supervisor_review'),
+    path('schedule-defense/<int:group_id>/',schedule_defense,name='schedule_defense'),
 ]
 

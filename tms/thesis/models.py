@@ -27,7 +27,7 @@ class ThesisGroup(models.Model):
 class Proposal(models.Model):
     group = models.ForeignKey(
         'ThesisGroup',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE, related_name='proposals'
     )
 
     title = models.CharField(max_length=255)
@@ -64,6 +64,13 @@ class Proposal(models.Model):
     reviewed_at = models.DateTimeField(
         null=True,
         blank=True
+    )
+    version = models.IntegerField(
+        default=1
+    )
+
+    submitted_at = models.DateTimeField(
+        auto_now_add=True
     )
     
     def __str__(self):
@@ -160,7 +167,10 @@ class Defense(models.Model):
     date = models.DateField()
     time = models.TimeField()
     venue = models.CharField(max_length=100)
-
+    submission_deadline = models.DateTimeField()
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
     def __str__(self):
         return self.thesis.title
     
