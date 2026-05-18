@@ -511,12 +511,15 @@ def upload_thesis_document(request, thesis_id):
 # SCHEDULE DEFENSE
 # ============================================
 @login_required
-def schedule_defense(request, thesis_id):
+@lecturer_required
+def schedule_defense(request, group_id):
+
     lecturer = Lecturer.objects.get(
         user=request.user
     )
 
     if not lecturer.is_supervisor:
+
         messages.error(
             request,
             "Only supervisors can schedule defenses."
@@ -526,23 +529,28 @@ def schedule_defense(request, thesis_id):
             'lecturer_dashboard'
         )
 
-    thesis = get_object_or_404(
-        Thesis,
-        id=thesis_id
+    group = get_object_or_404(
+        ThesisGroup,
+        id=group_id,
+        supervisor=lecturer
     )
 
     if request.method == 'POST':
+
         form = DefenseForm(
             request.POST
         )
 
         if form.is_valid():
+
             defense = form.save(
                 commit=False
             )
 
-            defense.thesis = thesis
+            defense.group = group
+
             defense.scheduled_by = lecturer
+
             defense.save()
 
             messages.success(
@@ -551,16 +559,17 @@ def schedule_defense(request, thesis_id):
             )
 
             return redirect(
-                # 'lecturer_dashboard'
-                lecturer_group_detail,thesis.proposal.group.id
+                'lecturer_group_detail',
+                group.id
             )
 
     else:
+
         form = DefenseForm()
 
     context = {
         'form': form,
-        'thesis': thesis
+        'group': group
     }
 
     return render(
@@ -568,8 +577,6 @@ def schedule_defense(request, thesis_id):
         'thesis/schedule_defense.html',
         context
     )
-
-
 # ============================================
 # LECTURER GROUPS
 # ============================================

@@ -163,6 +163,12 @@
         Defense
     </h4>
 
+    <a href="{% url 'schedule_defense' group.id %}" class="btn btn-success">
+
+        Schedule Defense
+
+    </a>
+
     {% if defense %}
 
     <div class="card p-3">
@@ -201,11 +207,7 @@
         Send Notification
 
     </a>
-    <a href="{% url 'schedule_defense' group.id %}" class="btn btn-success">
-
-        Schedule Defense
-
-    </a>
+    
 
 </div>
 

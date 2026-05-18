@@ -159,11 +159,15 @@ class Review(models.Model):
 
 
 class Defense(models.Model):
-    thesis = models.OneToOneField(
-        Thesis,
+    group = models.OneToOneField(
+        ThesisGroup,
         on_delete=models.CASCADE
     )
-
+    scheduled_by = models.ForeignKey(
+        Lecturer,
+        on_delete=models.SET_NULL,
+        null=True
+    )
     date = models.DateField()
     time = models.TimeField()
     venue = models.CharField(max_length=100)
