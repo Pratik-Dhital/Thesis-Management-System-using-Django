@@ -1,36 +1,332 @@
 {% extends "base.html" %}
+
 {% block start %}
 
-<form method="post" class="col-6 mx-auto card p-4 mt-5">
+<div class="container py-5">
 
-    {% csrf_token %}
+    <div class="row justify-content-center">
 
-    <h2>Create User</h2>
+        <div class="col-lg-7">
 
-    <input type="text" name="first_name"
-           class="form-control mt-3"
-           placeholder="First Name">
+            <!-- Main Card -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
 
-    <input type="text" name="last_name"
-           class="form-control mt-3"
-           placeholder="Last Name">
+                <!-- Header -->
+                <div class="create-user-header text-white p-5 text-center">
 
-    <input type="text" name="username"
-           class="form-control mt-3"
-           placeholder="Username">
+                    <div class="header-icon mx-auto mb-4">
 
-    <input type="email" name="email"
-           class="form-control mt-3"
-           placeholder="Email">
+                        <i class="bi bi-person-plus-fill"></i>
 
-    <input type="password" name="password"
-           class="form-control mt-3"
-           placeholder="Password">
+                    </div>
 
-    <button class="btn btn-primary mt-3">
-        Create User
-    </button>
+                    <h1 class="fw-bold mb-2">
 
-</form>
+                        Create User
+
+                    </h1>
+
+                    <p class="opacity-75 mb-0">
+
+                        Add a new student or lecturer account
+                        to the Thesis Management System.
+
+                    </p>
+
+                </div>
+
+
+
+                <!-- Form Section -->
+                <div class="card-body p-4 p-md-5">
+
+                    <form method="post">
+
+                        {% csrf_token %}
+
+                        <!-- Name Row -->
+                        <div class="row">
+
+                            <div class="col-md-6 mb-4">
+
+                                <label class="form-label fw-semibold">
+
+                                    First Name
+
+                                </label>
+
+                                <div class="input-group custom-input-group">
+
+                                    <span class="input-group-text">
+
+                                        <i class="bi bi-person-fill"></i>
+
+                                    </span>
+
+                                    <input type="text"
+                                           name="first_name"
+                                           class="form-control custom-input"
+                                           placeholder="Enter first name">
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+
+                                <label class="form-label fw-semibold">
+
+                                    Last Name
+
+                                </label>
+
+                                <div class="input-group custom-input-group">
+
+                                    <span class="input-group-text">
+
+                                        <i class="bi bi-person-fill"></i>
+
+                                    </span>
+
+                                    <input type="text"
+                                           name="last_name"
+                                           class="form-control custom-input"
+                                           placeholder="Enter last name">
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Username -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+
+                                Username
+
+                            </label>
+
+                            <div class="input-group custom-input-group">
+
+                                <span class="input-group-text">
+
+                                    <i class="bi bi-at"></i>
+
+                                </span>
+
+                                <input type="text"
+                                       name="username"
+                                       class="form-control custom-input"
+                                       placeholder="Choose a username">
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Email -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+
+                                Email Address
+
+                            </label>
+
+                            <div class="input-group custom-input-group">
+
+                                <span class="input-group-text">
+
+                                    <i class="bi bi-envelope-fill"></i>
+
+                                </span>
+
+                                <input type="email"
+                                       name="email"
+                                       class="form-control custom-input"
+                                       placeholder="Enter email address">
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Password -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+
+                                Password
+
+                            </label>
+
+                            <div class="input-group custom-input-group">
+
+                                <span class="input-group-text">
+
+                                    <i class="bi bi-lock-fill"></i>
+
+                                </span>
+
+                                <input type="password"
+                                       name="password"
+                                       class="form-control custom-input"
+                                       placeholder="Enter secure password">
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Info Box -->
+                        <div class="info-box mb-4">
+
+                            <div class="d-flex align-items-start">
+
+                                <div class="info-icon me-3">
+
+                                    <i class="bi bi-info-circle-fill"></i>
+
+                                </div>
+
+                                <div>
+
+                                    <h6 class="fw-bold mb-2">
+
+                                        Important Note
+
+                                    </h6>
+
+                                    <p class="text-muted mb-0">
+
+                                        After creating the account,
+                                        assign a role such as Student or Lecturer
+                                        from the role management page.
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+
+                            <button class="btn btn-primary btn-lg rounded-pill shadow-sm">
+
+                                <i class="bi bi-person-plus-fill me-2"></i>
+
+                                Create User
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- Custom Styling -->
+<style>
+
+    body{
+        background: linear-gradient(to bottom right, #f4f7ff, #eef2ff);
+    }
+
+    .rounded-4{
+        border-radius: 1.3rem;
+    }
+
+    .create-user-header{
+        background: linear-gradient(135deg, #0d6efd, #4f8cff);
+    }
+
+    .header-icon{
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+    }
+
+    .custom-input-group{
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+        transition: 0.3s ease;
+    }
+
+    .custom-input-group:focus-within{
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.15rem rgba(13,110,253,.15);
+    }
+
+    .input-group-text{
+        background: #f8f9ff;
+        border: none;
+        color: #0d6efd;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .custom-input{
+        border: none;
+        padding: 12px 15px;
+    }
+
+    .custom-input:focus{
+        box-shadow: none;
+    }
+
+    .info-box{
+        background: #f8f9ff;
+        border: 1px solid #e9ecef;
+        border-radius: 16px;
+        padding: 20px;
+    }
+
+    .info-icon{
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(25,135,84,0.12);
+        color: #198754;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+</style>
+
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 {% endblock %}

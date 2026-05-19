@@ -2,216 +2,520 @@
 
 {% block start %}
 
-<div class="container py-4">
+<div class="container py-5">
 
-    <h2>
-        {{ group.name }}
-    </h2>
+    <!-- Group Header -->
+    <div class="group-header shadow-lg rounded-4 p-5 mb-5 text-white">
 
-    <hr>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
 
-    <h4>
-        Supervisor
-    </h4>
+            <div>
 
-    <p>
-        {{ group.supervisor.full_name }}
-    </p>
+                <span class="badge bg-light text-primary px-3 py-2 mb-3">
+                    Thesis Group
+                </span>
 
-    <hr>
+                <h1 class="fw-bold mb-2">
+                    {{ group.name }}
+                </h1>
 
-    <h4>
-        Group Members
-    </h4>
+                <p class="opacity-75 mb-0">
+                    Manage thesis activities, members, documents,
+                    proposal progress, and defense scheduling.
+                </p>
 
-    {% for member in members %}
+            </div>
 
-    <div class="card p-3 mb-2">
+            <div class="mt-4 mt-md-0">
 
-        {{ member.student.full_name }}
+                <div class="group-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
-    {% endfor %}
 
-    <hr>
 
-    <h4>
-        Proposal
-    </h4>
+    <!-- Supervisor -->
+    <div class="section-card shadow-sm rounded-4 p-4 mb-4">
 
-    {% if proposal %}
+        <div class="section-title">
 
-    <div class="card p-3">
+            <i class="bi bi-person-workspace text-primary me-2"></i>
 
-        <h5>
-            {{ proposal.title }}
-        </h5>
+            Supervisor
 
-        <p>
-            {{ proposal.description }}
-        </p>
+        </div>
 
-        <p>
-            Status:
-            {{ proposal.status.name }}
-        </p>
+        <div class="info-card mt-3">
 
-        {% if proposal.document %}
-        <a href="{{ proposal.document.url }}">
-            View Proposal
-        </a>
+            <i class="bi bi-person-circle me-2"></i>
+
+            {{ group.supervisor.full_name }}
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Group Members -->
+    <div class="section-card shadow-sm rounded-4 p-4 mb-4">
+
+        <div class="section-title">
+
+            <i class="bi bi-people-fill text-success me-2"></i>
+
+            Group Members
+
+        </div>
+
+        <div class="row mt-3">
+
+            {% for member in members %}
+
+            <div class="col-md-6 mb-3">
+
+                <div class="member-card">
+
+                    <i class="bi bi-person-badge-fill text-success me-2"></i>
+
+                    {{ member.student.full_name }}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Proposal -->
+    <div class="section-card shadow-sm rounded-4 p-4 mb-4">
+
+        <div class="section-title">
+
+            <i class="bi bi-file-earmark-text-fill text-warning me-2"></i>
+
+            Proposal
+
+        </div>
+
+        {% if proposal %}
+
+        <div class="proposal-card mt-3">
+
+            <h4 class="fw-bold mb-3">
+
+                {{ proposal.title }}
+
+            </h4>
+
+            <p class="text-muted">
+
+                {{ proposal.description }}
+
+            </p>
+
+            <div class="mb-3">
+
+                <span class="badge bg-warning text-dark px-3 py-2">
+
+                    {{ proposal.status.name }}
+
+                </span>
+
+            </div>
+
+            {% if proposal.document %}
+
+            <a href="{{ proposal.document.url }}"
+               class="btn btn-primary rounded-pill"
+               target="_blank">
+
+                <i class="bi bi-file-earmark-arrow-down me-2"></i>
+
+                View Proposal
+
+            </a>
+
+            {% else %}
+
+            <div class="alert alert-danger mt-3 mb-0">
+
+                File Missing
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
         {% else %}
-        <span class="text-danger">
-            File Missing
-        </span>
+
+        <div class="alert alert-warning mt-3">
+
+            No proposal submitted.
+
+        </div>
+
         {% endif %}
-    </div>
-
-    {% else %}
-
-    <div class="alert alert-warning">
-
-        No proposal submitted.
 
     </div>
 
-    {% endif %}
 
-    <hr>
 
-    <h4>
-        Thesis Progress
-    </h4>
+    <!-- Thesis Progress -->
+    <div class="section-card shadow-sm rounded-4 p-4 mb-4">
 
-    {% if progress %}
+        <div class="section-title">
 
-    {% for item in progress %}
+            <i class="bi bi-graph-up-arrow text-info me-2"></i>
 
-    <div class="card p-3 mb-2">
+            Thesis Progress
 
-        <h5>
-            {{ item.title }}
-        </h5>
+        </div>
 
-        <p>
-            {{ item.description }}
-        </p>
+        {% if progress %}
 
-        <small>
-            {{ item.created_at }}
-        </small>
+        <div class="timeline mt-4">
 
-    </div>
+            {% for item in progress %}
 
-    {% endfor %}
+            <div class="timeline-item">
 
-    {% else %}
+                <div class="timeline-dot"></div>
 
-    <div class="alert alert-info">
+                <div class="timeline-content">
 
-        No thesis progress available.
+                    <h5 class="fw-bold">
 
-    </div>
+                        {{ item.title }}
 
-    {% endif %}
+                    </h5>
 
-    <hr>
+                    <p class="text-muted mb-2">
 
-    <h4>
-        Thesis Documents
-    </h4>
+                        {{ item.description }}
 
-    {% if documents %}
+                    </p>
 
-    {% for document in documents %}
+                    <small class="text-secondary">
 
-    <div class="card p-3 mb-2">
+                        <i class="bi bi-clock me-1"></i>
 
-        {% if document.file %}
+                        {{ item.created_at }}
 
-        <a href="{{ document.file.url }}" target="_blank">
+                    </small>
 
-            Open Document
+                </div>
 
-        </a>
+            </div>
+
+            {% endfor %}
+
+        </div>
 
         {% else %}
 
-        <span class="text-danger">
+        <div class="alert alert-info mt-3">
 
-            File Missing
+            No thesis progress available.
 
-        </span>
+        </div>
 
         {% endif %}
 
     </div>
 
-    {% endfor %}
 
-    {% else %}
 
-    <div class="alert alert-warning">
+    <!-- Thesis Documents -->
+    <div class="section-card shadow-sm rounded-4 p-4 mb-4">
 
-        No thesis documents uploaded.
+        <div class="section-title">
+
+            <i class="bi bi-folder-fill text-danger me-2"></i>
+
+            Thesis Documents
+
+        </div>
+
+        {% if documents %}
+
+        <div class="row mt-3">
+
+            {% for document in documents %}
+
+            <div class="col-md-6 mb-3">
+
+                <div class="document-card">
+
+                    {% if document.file %}
+
+                    <a href="{{ document.file.url }}"
+                       target="_blank"
+                       class="text-decoration-none">
+
+                        <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>
+
+                        Open Document
+
+                    </a>
+
+                    {% else %}
+
+                    <span class="text-danger">
+
+                        File Missing
+
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="alert alert-warning mt-3">
+
+            No thesis documents uploaded.
+
+        </div>
+
+        {% endif %}
 
     </div>
 
-    {% endif %}
 
-    <hr>
 
-    <h4>
-        Defense
-    </h4>
+    <!-- Defense -->
+    <div class="section-card shadow-sm rounded-4 p-4 mb-4">
 
-    <a href="{% url 'schedule_defense' group.id %}" class="btn btn-success">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
 
-        Schedule Defense
+            <div class="section-title mb-3 mb-md-0">
 
-    </a>
+                <i class="bi bi-calendar-check-fill text-success me-2"></i>
 
-    {% if defense %}
+                Defense
 
-    <div class="card p-3">
+            </div>
 
-        <p>
-            Date:
-            {{ defense.date }}
-        </p>
+            <a href="{% url 'schedule_defense' group.id %}"
+               class="btn btn-success rounded-pill px-4">
 
-        <p>
-            Time:
-            {{ defense.time }}
-        </p>
+                <i class="bi bi-calendar-plus-fill me-2"></i>
 
-        <p>
-            Venue:
-            {{ defense.venue }}
-        </p>
+                Schedule Defense
+
+            </a>
+
+        </div>
+
+        {% if defense %}
+
+        <div class="defense-card mt-4">
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <div class="defense-info">
+
+                        <h6>Date</h6>
+
+                        <p>{{ defense.date }}</p>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <div class="defense-info">
+
+                        <h6>Time</h6>
+
+                        <p>{{ defense.time }}</p>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <div class="defense-info">
+
+                        <h6>Venue</h6>
+
+                        <p>{{ defense.venue }}</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="alert alert-warning mt-4">
+
+            Defense not scheduled.
+
+        </div>
+
+        {% endif %}
 
     </div>
 
-    {% else %}
 
-    <div class="alert alert-warning">
 
-        Defense not scheduled.
+    <!-- Notification Button -->
+    <div class="text-center mt-5">
+
+        <a href="{% url 'notification_center' %}"
+           class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+
+            <i class="bi bi-send-fill me-2"></i>
+
+            Send Notification
+
+        </a>
 
     </div>
-
-    {% endif %}
-
-    <hr>
-
-    <a href="{% url 'notification_center' %}" class="btn btn-primary">
-
-        Send Notification
-
-    </a>
-
 
 </div>
+
+
+
+<!-- Custom Styling -->
+<style>
+
+    body{
+        background: linear-gradient(to bottom right, #f4f7ff, #eef2ff);
+    }
+
+    .rounded-4{
+        border-radius: 1.3rem;
+    }
+
+    .group-header{
+        background: linear-gradient(135deg, #0d6efd, #4f8cff);
+    }
+
+    .group-icon{
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+    }
+
+    .section-card{
+        background: white;
+    }
+
+    .section-title{
+        font-size: 1.4rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+    }
+
+    .info-card,
+    .member-card,
+    .document-card,
+    .proposal-card,
+    .defense-card{
+        background: #f8f9ff;
+        border: 1px solid #e9ecef;
+        border-radius: 15px;
+        padding: 20px;
+    }
+
+    .member-card,
+    .document-card{
+        transition: 0.3s ease;
+    }
+
+    .member-card:hover,
+    .document-card:hover{
+        transform: translateY(-4px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+
+    .timeline{
+        position: relative;
+        margin-left: 15px;
+        border-left: 3px solid #0d6efd;
+        padding-left: 25px;
+    }
+
+    .timeline-item{
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .timeline-dot{
+        width: 16px;
+        height: 16px;
+        background: #0d6efd;
+        border-radius: 50%;
+        position: absolute;
+        left: -34px;
+        top: 5px;
+    }
+
+    .timeline-content{
+        background: #f8f9ff;
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid #e9ecef;
+    }
+
+    .defense-info{
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+    }
+
+    .defense-info h6{
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+
+    .defense-info p{
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+</style>
+
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 {% endblock %}

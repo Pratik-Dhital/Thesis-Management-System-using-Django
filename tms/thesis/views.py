@@ -628,14 +628,32 @@ def schedule_defense(request, group_id):
 
         if form.is_valid():
 
-            defense = form.save(
-                commit=False
-            )
+            existing_defense = Defense.objects.filter(
+                thesis=thesis
+            ).first()
 
-            defense.thesis = thesis
-            defense.scheduled_by = lecturer
+            if existing_defense:
 
-            defense.save()
+                existing_defense.date = form.cleaned_data['date']
+                existing_defense.time = form.cleaned_data['time']
+                existing_defense.venue = form.cleaned_data['venue']
+                existing_defense.submission_deadline = form.cleaned_data['submission_deadline']
+                existing_defense.scheduled_by = lecturer
+
+                existing_defense.save()
+
+                defense = existing_defense
+
+            else:
+
+                defense = form.save(
+                    commit=False
+                )
+
+                defense.thesis = thesis
+                defense.scheduled_by = lecturer
+
+                defense.save()
 
             # =========================
             # SEND NOTIFICATION
@@ -649,26 +667,25 @@ def schedule_defense(request, group_id):
                 Notification.objects.create(
                     user=member.student.user,
                     message=f"""
-        Defense Scheduled
-
-        Group: {group.name}
-        Date: {defense.date}
-        Time: {defense.time}
-        Venue: {defense.venue}
-        Submission Deadline: {defense.submission_deadline}
-        """
+    Defense Scheduled
+    Group: {group.name}
+    Date: {defense.date}
+    Time: {defense.time}
+    Venue: {defense.venue}
+    Submission Deadline: {defense.submission_deadline}
+    """
                 )
         
             Notification.objects.create(
                 user=member.student.user,
                 message=f"""
-            Defense Scheduled
+    Defense Scheduled
 
-            Date: {defense.date}
-            Time: {defense.time}
-            Venue: {defense.venue}
-            Submission Deadline: {defense.submission_deadline}
-            """
+    Date: {defense.date}
+    Time: {defense.time}
+    Venue: {defense.venue}
+    Submission Deadline: {defense.submission_deadline}
+    """
             )
 
             # create progress entry
@@ -708,6 +725,7 @@ at
         'thesis/schedule_defense.html',
         context
     )
+
 # ============================================
 # LECTURER GROUPS
 # ============================================
