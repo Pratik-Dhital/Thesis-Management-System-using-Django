@@ -157,16 +157,16 @@ class Review(models.Model):
     def __str__(self):
         return self.thesis.title
 
-
 class Defense(models.Model):
-    group = models.OneToOneField(
-        ThesisGroup,
-        on_delete=models.CASCADE
+    thesis = models.OneToOneField(
+        Thesis,
+        on_delete=models.CASCADE, null=True, blank=True
     )
     scheduled_by = models.ForeignKey(
         Lecturer,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True
     )
     date = models.DateField()
     time = models.TimeField()

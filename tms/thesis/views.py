@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-
 from .forms import ProposalForm, ThesisDocumentForm, DefenseForm
 from .models import (
     ThesisGroup,
@@ -26,19 +25,11 @@ from notification.models import Notification
 # ============================================
 @login_required
 def create_group(request):
-    supervisors = Lecturer.objects.filter(
-        is_supervisor=True
-    )
 
-    current_student = Student.objects.get(
+    current_student = get_object_or_404(
+        Student,
         user=request.user
     )
-
-    config = GroupConfiguration.objects.first()
-    max_students = 4
-
-    if config:
-        max_students = config.max_students_per_group
 
     existing_group = GroupMember.objects.filter(
         student=current_student
@@ -49,79 +40,94 @@ def create_group(request):
             request,
             "You are already in a group."
         )
+
         return redirect(
             'student_dashboard'
         )
 
+    supervisors = Lecturer.objects.filter(
+        is_supervisor=True
+    )
+
+    config = GroupConfiguration.objects.first()
+
+    max_students = 4
+
+    if config:
+        max_students = config.max_students_per_group
+
     students = Student.objects.filter(
         department=current_student.department
+    ).exclude(
+        id=current_student.id
     ).exclude(
         groupmember__isnull=False
     )
 
     if request.method == 'POST':
-        name = request.POST.get(
-            'name'
-        )
 
-        supervisor_id = request.POST.get(
-            'supervisor'
-        )
+        try:
 
-        member_ids = request.POST.getlist(
-            'members'
-        )
-
-        # Include current student automatically
-        selected_members = list(
-            member_ids
-        )
-
-        if str(current_student.id) not in selected_members:
-            selected_members.append(
-                str(current_student.id)
+            name = request.POST.get(
+                'name'
             )
 
-        total_members = len(
-            selected_members
-        )
-
-        if total_members > max_students:
-            messages.error(
-                request,
-                f"Maximum allowed students is {max_students}"
-            )
-            return redirect(
-                'create_group'
+            supervisor_id = request.POST.get(
+                'supervisor'
             )
 
-        supervisor = Lecturer.objects.get(
-            id=supervisor_id
-        )
-
-        group = ThesisGroup.objects.create(
-            name=name,
-            supervisor=supervisor
-        )
-
-        for member_id in selected_members:
-            student = Student.objects.get(
-                id=member_id
+            member_ids = request.POST.getlist(
+                'members'
             )
 
+            supervisor = Lecturer.objects.get(
+                id=supervisor_id
+            )
+
+            group = ThesisGroup.objects.create(
+                name=name,
+                supervisor=supervisor
+            )
+
+            # add current student automatically
             GroupMember.objects.create(
                 group=group,
-                student=student
+                student=current_student
             )
 
-        messages.success(
-            request,
-            "Group created successfully"
-        )
+            # add selected members
+            for member_id in member_ids:
 
-        return redirect(
-            'student_dashboard'
-        )
+                student = Student.objects.get(
+                    id=member_id
+                )
+
+                # prevent duplicate insert
+                if not GroupMember.objects.filter(
+                    group=group,
+                    student=student
+                ).exists():
+
+                    GroupMember.objects.create(
+                        group=group,
+                        student=student
+                    )
+
+            messages.success(
+                request,
+                "Group created successfully."
+            )
+
+            return redirect(
+                'student_dashboard'
+            )
+
+        except Exception as e:
+
+            messages.error(
+                request,
+                f"Error creating group: {str(e)}"
+            )
 
     context = {
         'supervisors': supervisors,
@@ -135,12 +141,12 @@ def create_group(request):
         context
     )
 
-
 # ============================================
 # SUBMIT PROPOSAL
 # ============================================
 @login_required
 def submit_proposal(request):
+
     student = Student.objects.get(
         user=request.user
     )
@@ -150,44 +156,28 @@ def submit_proposal(request):
     ).first()
 
     if not group:
+
+        messages.error(
+            request,
+            "You must create a group first."
+        )
+
         return redirect(
             'create_group'
         )
 
-    if request.method == 'POST':
-        form = ProposalForm(
-            request.POST,
-            request.FILES
-        )
-
-        if form.is_valid():
-            proposal = form.save(
-                commit=False
-            )
-
-            proposal.group = group
-            proposal.status = ThesisStatus.objects.get(
-                name='Pending'
-            )
-
-            proposal.save()
-
-            return redirect(
-                'student_dashboard'
-            )
-    else:
-        form = ProposalForm()
+    # latest proposal
+    latest_proposal = Proposal.objects.filter(
+        group=group
+    ).order_by(
+        '-version'
+    ).first()
 
     defense = Defense.objects.filter(
-    group=group
-).first()
-    
-    last_version = Proposal.objects.filter(
-        group=group
-    ).count()
+        thesis__proposal__group=group
+    ).first()
 
-    proposal.version = last_version + 1
-
+    # deadline check
     if defense:
 
         if timezone.now() > defense.submission_deadline:
@@ -200,10 +190,51 @@ def submit_proposal(request):
             return redirect(
                 'student_dashboard'
             )
-        
+
+    if request.method == 'POST':
+
+        form = ProposalForm(
+            request.POST,
+            request.FILES
+        )
+
+        if form.is_valid():
+
+            proposal = form.save(
+                commit=False
+            )
+
+            proposal.group = group
+
+            proposal.status = ThesisStatus.objects.get(
+                name='Pending'
+            )
+
+            # versioning
+            if latest_proposal:
+                proposal.version = latest_proposal.version + 1
+            else:
+                proposal.version = 1
+
+            proposal.save()
+
+            messages.success(
+                request,
+                "Proposal submitted successfully."
+            )
+
+            return redirect(
+                'student_dashboard'
+            )
+
+    else:
+
+        form = ProposalForm()
 
     context = {
-        'form': form
+        'form': form,
+        'latest_proposal': latest_proposal,
+        'defense': defense
     }
 
     return render(
@@ -211,7 +242,6 @@ def submit_proposal(request):
         'thesis/submit_proposal.html',
         context
     )
-
 
 # ============================================
 # LECTURER PROPOSALS
@@ -251,6 +281,9 @@ def pending_proposals(request):
     )
 
 
+# ============================================
+# REVIEW PROPOSAL
+# ============================================
 # ============================================
 # REVIEW PROPOSAL
 # ============================================
@@ -302,6 +335,42 @@ def review_proposal(request, proposal_id):
 
         proposal.save()
 
+        thesis = None
+
+        # create thesis automatically
+        if selected_status.name.lower() in ['approved', 'under review']:
+
+            thesis, created = Thesis.objects.get_or_create(
+                proposal=proposal,
+                defaults={
+                    'title': proposal.title,
+                    'supervisor': lecturer,
+                    'lecturer': lecturer,
+                    'status': selected_status,
+                }
+            )
+
+            thesis.status = selected_status
+            thesis.save()
+
+            # copy proposal document
+            if proposal.document:
+
+                ThesisDocument.objects.get_or_create(
+                    thesis=thesis,
+                    file=proposal.document
+                )
+
+            # create thesis progress
+            ThesisProgress.objects.get_or_create(
+                thesis=thesis,
+                title="Proposal Reviewed",
+                defaults={
+                    'description': f"Proposal status updated to {selected_status.name}"
+                }
+            )
+
+        # notify students
         members = GroupMember.objects.filter(
             group=proposal.group
         )
@@ -535,6 +604,22 @@ def schedule_defense(request, group_id):
         supervisor=lecturer
     )
 
+    thesis = Thesis.objects.filter(
+        proposal__group=group
+    ).first()
+
+    if not thesis:
+
+        messages.error(
+            request,
+            "No thesis found for this group."
+        )
+
+        return redirect(
+            'lecturer_group_detail',
+            group.id
+        )
+
     if request.method == 'POST':
 
         form = DefenseForm(
@@ -547,11 +632,56 @@ def schedule_defense(request, group_id):
                 commit=False
             )
 
-            defense.group = group
-
+            defense.thesis = thesis
             defense.scheduled_by = lecturer
 
             defense.save()
+
+            # =========================
+            # SEND NOTIFICATION
+            # =========================
+            members = GroupMember.objects.filter(
+                group=group
+            )
+
+            for member in members:
+
+                Notification.objects.create(
+                    user=member.student.user,
+                    message=f"""
+        Defense Scheduled
+
+        Group: {group.name}
+        Date: {defense.date}
+        Time: {defense.time}
+        Venue: {defense.venue}
+        Submission Deadline: {defense.submission_deadline}
+        """
+                )
+        
+            Notification.objects.create(
+                user=member.student.user,
+                message=f"""
+            Defense Scheduled
+
+            Date: {defense.date}
+            Time: {defense.time}
+            Venue: {defense.venue}
+            Submission Deadline: {defense.submission_deadline}
+            """
+            )
+
+            # create progress entry
+            ThesisProgress.objects.create(
+                thesis=thesis,
+                title="Defense Scheduled",
+                description=f"""
+Defense scheduled on
+{defense.date}
+at
+{defense.time}
+"""
+            )
 
             messages.success(
                 request,
@@ -569,7 +699,8 @@ def schedule_defense(request, group_id):
 
     context = {
         'form': form,
-        'group': group
+        'group': group,
+        'thesis': thesis
     }
 
     return render(
@@ -608,6 +739,7 @@ def lecturer_groups(request):
 @login_required
 @lecturer_required
 def lecturer_group_detail(request, group_id):
+
     lecturer = Lecturer.objects.get(
         user=request.user
     )
@@ -624,28 +756,27 @@ def lecturer_group_detail(request, group_id):
 
     proposal = Proposal.objects.filter(
         group=group
-    ).order_by('-submitted_at').first()
+    ).first()
 
-    thesis = None
-    progress = None
-    documents = None
+    thesis = Thesis.objects.filter(
+        proposal__group=group
+    ).first()
+
+    progress = []
+
+    documents = []
+
     defense = None
 
-    if proposal:
-        thesis = Thesis.objects.filter(
-            proposal=proposal
-        ).first()
-
     if thesis:
+
         progress = ThesisProgress.objects.filter(
             thesis=thesis
-        ).order_by(
-            '-created_at'
-        )
+        ).order_by('-created_at')
 
         documents = ThesisDocument.objects.filter(
             thesis=thesis
-        )
+        ).order_by('-uploaded_at')
 
         defense = Defense.objects.filter(
             thesis=thesis
@@ -658,7 +789,7 @@ def lecturer_group_detail(request, group_id):
         'thesis': thesis,
         'progress': progress,
         'documents': documents,
-        'defense': defense
+        'defense': defense,
     }
 
     return render(

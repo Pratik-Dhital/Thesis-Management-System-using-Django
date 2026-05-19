@@ -57,12 +57,15 @@
             {{ proposal.status.name }}
         </p>
 
-        <a href="{{ proposal.document.url }}" class="btn btn-info" target="_blank">
-
+        {% if proposal.document %}
+        <a href="{{ proposal.document.url }}">
             View Proposal
-
         </a>
-
+        {% else %}
+        <span class="text-danger">
+            File Missing
+        </span>
+        {% endif %}
     </div>
 
     {% else %}
@@ -207,7 +210,7 @@
         Send Notification
 
     </a>
-    
+
 
 </div>
 

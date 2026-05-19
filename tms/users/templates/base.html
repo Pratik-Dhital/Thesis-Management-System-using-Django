@@ -18,8 +18,7 @@
                 <span class="navbar-toggler-icon"></span>
 
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav"
-            >
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if request.user.is_authenticated %}
                     <li class="nav-item">
@@ -31,6 +30,17 @@
                     {% endif %}
                 </ul>
             </div>
+            {% if messages %}
+
+            {% for message in messages %}
+
+            <div class="alert alert-{{ message.tags }} mt-2">
+                {{ message }}
+            </div>
+
+            {% endfor %}
+
+            {% endif %}
         </div>
     </nav>
 

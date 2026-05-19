@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import user_passes_test
 from users.decorators import student_required, lecturer_required
 from thesis.models import ThesisGroup
 from users.models import Student
+from thesis.models import ThesisGroup
+from users.models import Student, Lecturer
 User = get_user_model()
 
 
@@ -147,8 +149,18 @@ def student_dashboard(request):
         student=student
     ).exists()
 
+    notifications = Notification.objects.filter(
+        user=request.user
+    ).order_by('-created_at')
+
+    latest_notification = Notification.objects.filter(
+        user=request.user
+    ).order_by('-created_at').first()
+
     context = {
-        'has_group': has_group
+        'has_group': has_group,
+        'notifications': notifications,
+        'latest_notification': latest_notification
     }
 
     return render(
@@ -156,11 +168,6 @@ def student_dashboard(request):
         'student/dashboard.html',
         context
     )
-
-
-from thesis.models import ThesisGroup
-from users.models import Student, Lecturer
-
 
 @login_required
 @lecturer_required

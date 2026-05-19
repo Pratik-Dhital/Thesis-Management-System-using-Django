@@ -26,5 +26,9 @@ class Notification(models.Model):
         auto_now_add=True
     )
 
+    is_popup_shown = models.BooleanField(
+    default=False
+    )
+
     def __str__(self):
         return self.user.email
