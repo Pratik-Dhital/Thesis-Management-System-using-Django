@@ -4,31 +4,12 @@ from users.models import User
 
 class Notification(models.Model):
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    sent_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='sent_notifications'
-    )
-
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    sent_by = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,related_name='sent_notifications')
     message = models.TextField()
-
-    is_read = models.BooleanField(
-        default=False
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    is_popup_shown = models.BooleanField(
-    default=False
-    )
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_popup_shown = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.email

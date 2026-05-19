@@ -14,15 +14,11 @@ from .models import (
     Defense,
     GroupConfiguration
 )
-
 from users.models import Student, Lecturer
 from users.decorators import lecturer_required
 from notification.models import Notification
 
-
-# ============================================
-# CREATE GROUP
-# ============================================
+# Create Group
 @login_required
 def create_group(request):
 
@@ -141,9 +137,7 @@ def create_group(request):
         context
     )
 
-# ============================================
 # SUBMIT PROPOSAL
-# ============================================
 @login_required
 def submit_proposal(request):
 
@@ -243,9 +237,7 @@ def submit_proposal(request):
         context
     )
 
-# ============================================
 # LECTURER PROPOSALS
-# ============================================
 @login_required
 @lecturer_required
 def lecturer_proposals(request):
@@ -280,13 +272,7 @@ def pending_proposals(request):
         context
     )
 
-
-# ============================================
 # REVIEW PROPOSAL
-# ============================================
-# ============================================
-# REVIEW PROPOSAL
-# ============================================
 @login_required
 @lecturer_required
 def review_proposal(request, proposal_id):
@@ -405,9 +391,8 @@ status updated to:
         'thesis/review_proposal.html',
         context
     )
-# ============================================
+
 # SUPERVISOR REVIEW
-# ============================================
 @login_required
 @lecturer_required
 def supervisor_review(request, proposal_id):
@@ -495,10 +480,7 @@ updated to:
         context
     )
 
-
-# ============================================
 # UPLOAD THESIS DOCUMENT
-# ============================================
 @login_required
 def upload_thesis_document(request, thesis_id):
     thesis = get_object_or_404(
@@ -576,9 +558,7 @@ def upload_thesis_document(request, thesis_id):
         context
     )
 
-# ============================================
 # SCHEDULE DEFENSE
-# ============================================
 @login_required
 @lecturer_required
 def schedule_defense(request, group_id):
@@ -726,9 +706,7 @@ at
         context
     )
 
-# ============================================
 # LECTURER GROUPS
-# ============================================
 @login_required
 @lecturer_required
 def lecturer_groups(request):
@@ -751,9 +729,7 @@ def lecturer_groups(request):
     )
 
 
-# ============================================
 # LECTURER GROUP DETAIL
-# ============================================
 @login_required
 @lecturer_required
 def lecturer_group_detail(request, group_id):
@@ -816,10 +792,7 @@ def lecturer_group_detail(request, group_id):
         context
     )
 
-
-# ============================================
 # NOTIFICATION CENTER
-# ============================================
 @login_required
 @lecturer_required
 def notification_center(request):
@@ -844,7 +817,7 @@ def notification_center(request):
             'message'
         )
 
-        # ================= SEND TO GROUP =================
+        # SEND TO GROUP
         if send_type == "group":
             group_id = request.POST.get(
                 'group_id'
@@ -864,7 +837,7 @@ def notification_center(request):
                     message=message
                 )
 
-        # ================= SEND TO INDIVIDUAL STUDENT =================
+        # SEND TO INDIVIDUAL STUDENT 
         else:
             student_id = request.POST.get(
                 'student_id'
@@ -899,10 +872,7 @@ def notification_center(request):
         context
     )
 
-
-# ============================================
 # LECTURER COMMENT ON PROPOSAL
-# ============================================
 @login_required
 @lecturer_required
 def lecturer_comment_proposal(request, proposal_id):
@@ -960,7 +930,6 @@ Lecturer commented on proposal:
     )
 
 @login_required
-# @student_required
 def proposal_history(request):
 
     student = Student.objects.get(

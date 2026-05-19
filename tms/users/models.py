@@ -43,13 +43,3 @@ class Lecturer(models.Model):
     def __str__(self):
         return self.full_name
     
-# class Supervisor(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     full_name = models.CharField(max_length=150)
-#     designation = models.CharField(max_length=100)
-#     qualification = models.CharField(max_length=100)
-#     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, null=True, blank=True)
-#     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
-
-#     def __str__(self):
-#         return self.full_name

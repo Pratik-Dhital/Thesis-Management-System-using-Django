@@ -1,13 +1,10 @@
 from django import forms
-
 from .models import (
     Student,
     Lecturer
 )
 
-
-# ================= STUDENT =================
-
+# STUDENT
 class StudentProfileForm(forms.ModelForm):
 
     class Meta:
@@ -22,8 +19,7 @@ class StudentProfileForm(forms.ModelForm):
         ]
 
 
-# ================= LECTURER =================
-
+# LECTURER
 class LecturerProfileForm(forms.ModelForm):
 
     class Meta:
@@ -35,19 +31,3 @@ class LecturerProfileForm(forms.ModelForm):
             'faculty',
             'department'
         ]
-
-
-# ================= SUPERVISOR =================
-
-# class SupervisorProfileForm(forms.ModelForm):
-
-#     class Meta:
-
-#         model = Supervisor
-
-#         fields = [
-#             'designation',
-#             'qualification',
-#             'faculty',
-#             'department'
-#         ]

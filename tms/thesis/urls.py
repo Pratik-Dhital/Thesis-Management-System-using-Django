@@ -1,7 +1,5 @@
 from django.urls import path
-
 from notification import views
-
 from .views import (
     create_group,
     lecturer_comment_proposal,
