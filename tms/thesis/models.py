@@ -45,11 +45,11 @@ class Thesis(models.Model):
         return self.title
 
 class GroupMember(models.Model):
-    gp = models.ForeignKey(ThesisGroup,on_delete=models.CASCADE)
+    group = models.ForeignKey(ThesisGroup,on_delete=models.CASCADE)
     student = models.OneToOneField(Student,on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.student.full_name
+        return f"{self.student.full_name} - {self.group.name}"
 
 class ThesisDocument(models.Model):
     thesis = models.ForeignKey(Thesis,on_delete=models.CASCADE)

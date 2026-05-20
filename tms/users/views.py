@@ -1,31 +1,17 @@
 from django.shortcuts import render, redirect
-
 from thesis.models import GroupMember
-
 from .models import Student, Lecturer
-
 from django.contrib.auth import (get_user_model,authenticate,logout,login as auth_login)
-
 from django.contrib import messages
-
 from django.contrib.auth.decorators import login_required
-
 from .forms import (StudentProfileForm, LecturerProfileForm)
-
 from notification.models import Notification
-
 from academics.models import Faculty, Department
-
 from django.contrib.auth.decorators import user_passes_test
-
 from users.decorators import student_required, lecturer_required
-
 from thesis.models import ThesisGroup
-
 from users.models import Student
-
-from thesis.models import ThesisGroup
-
+from thesis.models import ThesisGroup, Proposal, Defense
 from users.models import Student, Lecturer
 
 User = get_user_model()
@@ -191,38 +177,65 @@ def student_dashboard(request):
 
 
 @login_required
-
 @lecturer_required
-
 def lecturer_dashboard(request):
 
-
-
     lecturer = Lecturer.objects.get(
-
         user=request.user
-
     )
 
     # PROFILE CHECK
-
     if (
-
         not lecturer.designation or
-
         not lecturer.faculty or
-
         not lecturer.department
-
     ):
 
-
-
         return redirect(
-
             'complete_lecturer_profile'
-
         )
+
+    # GROUPS UNDER THIS LECTURER
+    lecturer_groups = ThesisGroup.objects.filter(
+        supervisor=lecturer
+    )
+
+    # STUDENTS UNDER THIS LECTURER
+    students = Student.objects.filter(
+        groupmember__group__supervisor=lecturer
+    ).distinct()
+
+    # COUNTS
+    pending_reviews = Proposal.objects.filter(
+        group__supervisor=lecturer,
+        status__name='Pending'
+    ).count()
+
+    scheduled_defenses = Defense.objects.filter(
+        thesis__supervisor=lecturer
+    ).count()
+
+    supervised_students = students.count()
+
+    context = {
+
+        'lecturer_groups': lecturer_groups,
+
+        'students': students,
+
+        'pending_reviews': pending_reviews,
+
+        'scheduled_defenses': scheduled_defenses,
+
+        'supervised_students': supervised_students
+
+    }
+
+    return render(
+        request,
+        "lecturer/dashboard.html",
+        context
+    )
 
 
 
