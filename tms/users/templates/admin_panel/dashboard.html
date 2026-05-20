@@ -50,8 +50,7 @@
                         Add new students, lecturers, and administrators to the system.
                     </p>
 
-                    <a href="/admin-panel/create-user/"
-                       class="btn btn-primary rounded-pill px-4">
+                    <a href="/admin-panel/create-user/" class="btn btn-primary rounded-pill px-4">
 
                         <i class="bi bi-plus-circle me-2"></i>
                         Create
@@ -84,8 +83,7 @@
                         View, edit, activate, or remove user accounts and permissions.
                     </p>
 
-                    <a href="/admin-panel/manage-users/"
-                       class="btn btn-success rounded-pill px-4">
+                    <a href="/admin-panel/manage-users/" class="btn btn-success rounded-pill px-4">
 
                         <i class="bi bi-gear-fill me-2"></i>
                         Manage
@@ -118,8 +116,7 @@
                         Manage faculty records, supervisors, and academic staff.
                     </p>
 
-                    <a href="/admin-panel/manage-faculty/"
-                       class="btn btn-warning text-dark rounded-pill px-4">
+                    <a href="/admin-panel/manage-faculty/" class="btn btn-warning text-dark rounded-pill px-4">
 
                         <i class="bi bi-building me-2"></i>
                         Faculty
@@ -152,8 +149,7 @@
                         Organize and manage academic departments and related data.
                     </p>
 
-                    <a href="/admin-panel/manage-department/"
-                       class="btn btn-info text-white rounded-pill px-4">
+                    <a href="/admin-panel/manage-department/" class="btn btn-info text-white rounded-pill px-4">
 
                         <i class="bi bi-folder-fill me-2"></i>
                         Department
@@ -168,7 +164,6 @@
 
     </div>
 
-
     <!-- Quick Statistics -->
     <div class="row mt-5 g-4">
 
@@ -177,7 +172,7 @@
             <div class="stats-card shadow-sm rounded-4 p-4 text-center">
 
                 <h2 class="fw-bold text-primary">
-                    120
+                    {{ total_users }}
                 </h2>
 
                 <p class="text-muted mb-0">
@@ -193,7 +188,7 @@
             <div class="stats-card shadow-sm rounded-4 p-4 text-center">
 
                 <h2 class="fw-bold text-success">
-                    35
+                    {{ total_faculty }}
                 </h2>
 
                 <p class="text-muted mb-0">
@@ -209,7 +204,7 @@
             <div class="stats-card shadow-sm rounded-4 p-4 text-center">
 
                 <h2 class="fw-bold text-warning">
-                    10
+                    {{ total_departments }}
                 </h2>
 
                 <p class="text-muted mb-0">
@@ -225,7 +220,7 @@
             <div class="stats-card shadow-sm rounded-4 p-4 text-center">
 
                 <h2 class="fw-bold text-info">
-                    87
+                    {{ total_theses }}
                 </h2>
 
                 <p class="text-muted mb-0">
@@ -243,30 +238,29 @@
 
 <!-- Custom Styling -->
 <style>
-
-    body{
+    body {
         background: linear-gradient(to bottom right, #f5f7ff, #eef2ff);
     }
 
-    .admin-header{
+    .admin-header {
         background: white;
     }
 
-    .admin-icon{
+    .admin-icon {
         font-size: 5rem;
         color: #0d6efd;
     }
 
-    .dashboard-card{
+    .dashboard-card {
         border-radius: 1.5rem;
         transition: all 0.3s ease;
     }
 
-    .dashboard-card:hover{
+    .dashboard-card:hover {
         transform: translateY(-8px);
     }
 
-    .icon-box{
+    .icon-box {
         width: 90px;
         height: 90px;
         border-radius: 50%;
@@ -277,24 +271,22 @@
         font-size: 2.5rem;
     }
 
-    .stats-card{
+    .stats-card {
         background: white;
         transition: 0.3s ease;
     }
 
-    .stats-card:hover{
+    .stats-card:hover {
         transform: scale(1.03);
     }
 
-    .rounded-4{
+    .rounded-4 {
         border-radius: 1.2rem;
     }
-
 </style>
 
 
 <!-- Bootstrap Icons -->
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 {% endblock %}

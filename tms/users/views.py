@@ -190,6 +190,21 @@ def create_user(request):
     return render(request,'admin_panel/create_user.html')
 
 @user_passes_test(admin_required)
+def delete_user(request, user_id):
+    user = User.objects.get(id=user_id)
+    if request.method == 'POST':
+        user.delete()
+        messages.success(
+            request,
+            "User deleted successfully"
+        )
+        return redirect('manage_users')
+    context = {
+        'user_obj': user
+    }
+    return render(request,'admin_panel/delete_user.html',context)
+
+@user_passes_test(admin_required)
 def manage_users(request):
     users = User.objects.all()
     context = {

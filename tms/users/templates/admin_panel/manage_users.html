@@ -77,6 +77,7 @@
                                 Action
                             </th>
 
+
                         </tr>
 
                     </thead>
@@ -172,14 +173,28 @@
                             <!-- Action -->
                             <td class="text-center">
 
-                                <a href="/admin-panel/assign-role/{{user.id}}/"
-                                   class="btn btn-primary rounded-pill px-4">
+                                <div class="d-flex justify-content-center gap-2 flex-wrap">
 
-                                    <i class="bi bi-gear-fill me-2"></i>
+                                    <!-- Assign Role -->
+                                    <a href="/admin-panel/assign-role/{{user.id}}/"
+                                        class="btn btn-primary rounded-pill px-3">
 
-                                    Assign Role
+                                        <i class="bi bi-gear-fill me-1"></i>
 
-                                </a>
+                                        Assign Role
+
+                                    </a>
+
+                                    <!-- Delete User -->
+                                    <a href="{% url 'delete_user' user.id %}" class="btn btn-danger rounded-pill px-3">
+
+                                        <i class="bi bi-trash-fill me-1"></i>
+
+                                        Delete
+
+                                    </a>
+
+                                </div>
 
                             </td>
 
@@ -236,60 +251,59 @@
 
 <!-- Custom Styling -->
 <style>
-
-    body{
+    body {
         background: linear-gradient(to bottom right, #f4f7ff, #eef2ff);
     }
 
-    .rounded-4{
+    .rounded-4 {
         border-radius: 1.3rem;
     }
 
-    .users-header{
+    .users-header {
         background: linear-gradient(135deg, #0d6efd, #4f8cff);
     }
 
-    .header-icon{
+    .header-icon {
         width: 120px;
         height: 120px;
         border-radius: 50%;
-        background: rgba(255,255,255,0.15);
+        background: rgba(255, 255, 255, 0.15);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 4rem;
     }
 
-    .custom-table thead{
+    .custom-table thead {
         background: #f8f9ff;
     }
 
-    .custom-table thead th{
+    .custom-table thead th {
         padding: 20px;
         font-weight: 700;
         border-bottom: 1px solid #dee2e6;
         color: #495057;
     }
 
-    .custom-table tbody td{
+    .custom-table tbody td {
         padding: 20px;
         vertical-align: middle;
         border-bottom: 1px solid #f1f3f5;
     }
 
-    .custom-table tbody tr{
+    .custom-table tbody tr {
         transition: 0.3s ease;
     }
 
-    .custom-table tbody tr:hover{
+    .custom-table tbody tr:hover {
         background: #f8f9ff;
     }
 
-    .user-avatar{
+    .user-avatar {
         width: 55px;
         height: 55px;
         border-radius: 50%;
-        background: rgba(13,110,253,0.1);
+        background: rgba(13, 110, 253, 0.1);
         color: #0d6efd;
         display: flex;
         align-items: center;
@@ -298,16 +312,14 @@
         flex-shrink: 0;
     }
 
-    .empty-icon{
+    .empty-icon {
         font-size: 5rem;
         color: #adb5bd;
     }
-
 </style>
 
 
 <!-- Bootstrap Icons -->
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 {% endblock %}

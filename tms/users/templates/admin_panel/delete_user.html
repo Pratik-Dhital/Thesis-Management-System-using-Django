@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block start %}
+
+<div class="container mt-5">
+    
+    <div class="card shadow-lg p-4 col-md-6 mx-auto">
+
+        <h2 class="text-danger mb-3">
+            Delete User
+        </h2>
+
+        <hr>
+
+        <p class="fs-5">
+            Are you sure you want to delete this user?
+        </p>
+
+        <div class="mb-3">
+            <strong>Name:</strong>
+            {{ user_obj.first_name }} {{ user_obj.last_name }}
+        </div>
+
+        <div class="mb-3">
+            <strong>Username:</strong>
+            {{ user_obj.username }}
+        </div>
+
+        <div class="mb-3">
+            <strong>Email:</strong>
+            {{ user_obj.email }}
+        </div>
+
+        <div class="mb-4">
+            <strong>Role:</strong>
+            {{ user_obj.role }}
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <button type="submit" class="btn btn-danger">
+                Yes, Delete
+            </button>
+
+            <a href="{% url 'manage_users' %}" class="btn btn-secondary">
+                Cancel
+            </a>
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

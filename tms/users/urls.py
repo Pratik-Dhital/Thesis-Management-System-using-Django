@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import login_view, logout_view, student_dashboard,lecturer_dashboard, complete_lecturer_profile, complete_student_profile, admin_dashboard, create_user, manage_users, assign_role, manage_faculty, manage_department, home
+from .views import login_view, logout_view, student_dashboard,lecturer_dashboard, complete_lecturer_profile, complete_student_profile, admin_dashboard, create_user, manage_users, assign_role, manage_faculty, manage_department, home, delete_user
 
 urlpatterns = [
     path('', home, name='home'),
@@ -15,4 +15,5 @@ urlpatterns = [
     path('admin-panel/assign-role/<int:user_id>/', assign_role, name='assign_role'),
     path('admin-panel/manage-faculty/',manage_faculty, name='manage_faculty'),
     path('admin-panel/manage-department/', manage_department,name='manage_department'),
+    path('admin-panel/delete-user/<int:user_id>/', delete_user, name='delete_user'),
 ]
