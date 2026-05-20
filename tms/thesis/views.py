@@ -577,6 +577,18 @@ def schedule_defense(request, group_id):
         return redirect(
             'lecturer_dashboard'
         )
+    
+    if thesis.status.name != "Approved For Defense":
+
+        messages.error(
+            request,
+            "Thesis must be approved before scheduling defense."
+        )
+
+        return redirect(
+            'lecturer_group_detail',
+            group.id
+        )
 
     group = get_object_or_404(
         ThesisGroup,

@@ -12,9 +12,36 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">TMS</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            {% if request.user.is_authenticated %}
 
+            {% if request.user.role == 'student' %}
+
+            <a class="navbar-brand" href="{% url 'student_dashboard' %}">
+                TMS
+            </a>
+
+            {% elif request.user.role == 'lecturer' %}
+
+            <a class="navbar-brand" href="{% url 'lecturer_dashboard' %}">
+                TMS
+            </a>
+
+            {% elif request.user.role == 'admin' %}
+
+            <a class="navbar-brand" href="{% url 'admin_dashboard' %}">
+                TMS
+            </a>
+
+            {% endif %}
+
+            {% else %}
+
+            <a class="navbar-brand" href="{% url 'login' %}">
+                TMS
+            </a>
+
+            {% endif %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
 
             </button>
@@ -50,6 +77,264 @@
         {% endblock %}
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- FOOTER -->
+    <footer class="footer-section mt-5">
+
+        <div class="container py-4">
+
+            <div class="row g-4">
+
+                <!-- System Info -->
+                <div class="col-lg-4">
+
+                    <h4 class="fw-bold text-white mb-3">
+
+                        Thesis Management System
+
+                    </h4>
+
+                    <p class="footer-text">
+
+                        A centralized platform for managing thesis submissions,
+                        proposal reviews, notifications, and defense scheduling.
+
+                    </p>
+
+                </div>
+
+
+
+                <!-- Admin Footer Links -->
+                {% if request.user.role == "admin" %}
+
+                <div class="col-lg-4">
+
+                    <h5 class="footer-title">
+
+                        Admin Quick Links
+
+                    </h5>
+
+                    <ul class="footer-links">
+
+                        <li>
+                            <a href="/admin-panel/">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/admin-panel/create-user/">
+                                <i class="bi bi-person-plus-fill me-2"></i>
+                                Create User
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/admin-panel/manage-users/">
+                                <i class="bi bi-people-fill me-2"></i>
+                                Manage Users
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/admin-panel/manage-faculty/">
+                                <i class="bi bi-building-fill me-2"></i>
+                                Manage Faculty
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/admin-panel/manage-department/">
+                                <i class="bi bi-diagram-3-fill me-2"></i>
+                                Manage Department
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+                {% endif %}
+
+
+
+                <!-- Lecturer Footer Links -->
+                {% if request.user.role == "lecturer" %}
+
+                <div class="col-lg-4">
+
+                    <h5 class="footer-title">
+
+                        Lecturer Quick Links
+
+                    </h5>
+
+                    <ul class="footer-links">
+
+                        <li>
+                            <a href="{% url 'lecturer_dashboard' %}">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'lecturer_proposals' %}">
+                                <i class="bi bi-file-earmark-text-fill me-2"></i>
+                                Proposal Review
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'notification_center' %}">
+                                <i class="bi bi-bell-fill me-2"></i>
+                                Send Notification
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'lecturer_groups' %}">
+                                <i class="bi bi-calendar-event-fill me-2"></i>
+                                Defense Scheduling
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+                {% endif %}
+
+
+
+                <!-- Student Footer Links -->
+                {% if request.user.role == "student" %}
+
+                <div class="col-lg-4">
+
+                    <h5 class="footer-title">
+
+                        Student Quick Links
+
+                    </h5>
+
+                    <ul class="footer-links">
+
+                        <li>
+                            <a href="{% url 'student_dashboard' %}">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'submit_proposal' %}">
+                                <i class="bi bi-upload me-2"></i>
+                                Proposal Submission
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'student_notifications' %}">
+                                <i class="bi bi-bell-fill me-2"></i>
+                                View Notifications
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+                {% endif %}
+
+
+
+                <!-- Extra Info -->
+                <div class="col-lg-4">
+
+                    <h5 class="footer-title">
+
+                        System
+
+                    </h5>
+
+                    <p class="footer-text mb-2">
+
+                        Manage academic thesis workflow efficiently.
+
+                    </p>
+
+                    <p class="footer-copy">
+
+                        © 2026 Thesis Management System
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- FOOTER STYLE -->
+    <style>
+        .footer-section {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            margin-top: 80px;
+        }
+
+        .footer-title {
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+        }
+
+        .footer-copy {
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            transition: 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+    </style>
+
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </body>
 
 </html>
