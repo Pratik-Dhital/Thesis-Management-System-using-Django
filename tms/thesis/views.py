@@ -17,6 +17,9 @@ from .models import (
 from users.models import Student, Lecturer
 from users.decorators import lecturer_required
 from notification.models import Notification
+from django.conf import settings
+from django.core.mail import EmailMessage
+from .utils import generate_approval_letter
 
 # Create Group
 @login_required
@@ -324,7 +327,7 @@ def review_proposal(request, proposal_id):
         thesis = None
 
         # create thesis automatically
-        if selected_status.name.lower() in ['approved', 'under review']:
+        if selected_status.name.lower() in ['approved', 'under review', 'approved for defense']:
 
             thesis, created = Thesis.objects.get_or_create(
                 proposal=proposal,
@@ -355,6 +358,65 @@ def review_proposal(request, proposal_id):
                     'description': f"Proposal status updated to {selected_status.name}"
                 }
             )
+
+            # ============================================
+            # SEND APPROVAL EMAIL
+            # ============================================
+
+            if selected_status.name.lower() == "approved for defense":
+
+                pdf_buffer = generate_approval_letter(
+                    thesis
+                )
+
+                members = GroupMember.objects.filter(
+                    group=proposal.group
+                )
+
+                emails = []
+
+                for member in members:
+
+                    if member.student.user.email:
+
+                        emails.append(
+                            member.student.user.email
+                        )
+
+                email = EmailMessage(
+
+                    subject="Thesis Approved For Defense",
+
+                    body=f"""
+        Dear Students,
+
+        Your thesis titled:
+
+        "{thesis.title}"
+
+        has been approved for defense.
+
+        Please find the attached approval letter.
+
+        Supervisor:
+        {thesis.supervisor.full_name}
+        """,
+
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+
+                    to=emails
+                )
+
+                email.attach(
+                    "approval_letter.pdf",
+                    pdf_buffer.read(),
+                    "application/pdf"
+                )
+                try:
+                    email.send()
+                    print("Approval email sent successfully.")
+                except Exception as e:
+                    print(f"Error sending approval email: {str(e)}")
 
         # notify students
         members = GroupMember.objects.filter(
@@ -434,7 +496,7 @@ def supervisor_review(request, proposal_id):
         proposal.supervisor_comment = comment
         proposal.save()
 
-        if selected_status.name == "Approved":
+        if selected_status.name.lower() == "approved for defense":
             Thesis.objects.get_or_create(
                 proposal=proposal,
                 defaults={
