@@ -1,5 +1,4 @@
 from django import forms
-
 from .models import Proposal
 from .models import ThesisDocument
 from .models import Defense

@@ -27,4 +27,3 @@ urlpatterns = [
     path('supervisor/review/<int:proposal_id>/',supervisor_review,name='supervisor_review'),
     path('schedule-defense/<int:group_id>/',schedule_defense,name='schedule_defense'),
 ]
-

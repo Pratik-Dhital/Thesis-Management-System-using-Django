@@ -1,20 +1,31 @@
 from django.shortcuts import render, redirect
-from thesis.models import GroupMember
-from .models import Student, Lecturer
-from django.contrib.auth import (get_user_model,authenticate,logout,login as auth_login)
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .forms import (StudentProfileForm, LecturerProfileForm)
+from django.contrib.auth import (
+    authenticate,
+    get_user_model,
+    login as auth_login,
+    logout
+)
+from django.contrib.auth.decorators import (
+    login_required,
+    user_passes_test
+)
+from .models import Student, Lecturer
+from .forms import StudentProfileForm, LecturerProfileForm
+from .decorators import student_required, lecturer_required
+from thesis.models import (
+    GroupMember,
+    ThesisGroup,
+    Proposal,
+    Defense
+)
 from notification.models import Notification
 from academics.models import Faculty, Department
-from django.contrib.auth.decorators import user_passes_test
-from users.decorators import student_required, lecturer_required
-from thesis.models import ThesisGroup, Proposal, Defense
+
 
 User = get_user_model()
 
 # LOGIN
-
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')

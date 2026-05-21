@@ -383,7 +383,7 @@ def review_proposal(request, proposal_id):
 
                 email = EmailMessage(
 
-                    subject="Thesis Approved For Defense",
+                    subject="Thesis approved for defense",
 
                     body=f"""
         Dear Students,
@@ -618,7 +618,6 @@ def upload_thesis_document(request, thesis_id):
         context
     )
 
-# SCHEDULE DEFENSE
 @login_required
 @lecturer_required
 def schedule_defense(request, group_id):
@@ -637,24 +636,16 @@ def schedule_defense(request, group_id):
         return redirect(
             'lecturer_dashboard'
         )
-    
-    if thesis.status.name != "Approved For Defense":
-
-        messages.error(
-            request,
-            "Thesis must be approved before scheduling defense."
-        )
-
-        return redirect(
-            'lecturer_group_detail',
-            group.id
-        )
 
     group = get_object_or_404(
         ThesisGroup,
         id=group_id,
         supervisor=lecturer
     )
+
+    # ============================================
+    # GET THESIS FIRST
+    # ============================================
 
     thesis = Thesis.objects.filter(
         proposal__group=group
@@ -668,48 +659,55 @@ def schedule_defense(request, group_id):
         )
 
         return redirect(
+            'lecturer_groups'
+        )
+
+    # ============================================
+    # STATUS CHECK
+    # ============================================
+
+    if thesis.status.name.strip().lower() != "approved for defense":
+
+        messages.error(
+            request,
+            "Thesis must be approved for defense first."
+        )
+
+        return redirect(
             'lecturer_group_detail',
             group.id
         )
 
+    # ============================================
+    # EXISTING DEFENSE
+    # ============================================
+
+    existing_defense = Defense.objects.filter(
+        thesis=thesis
+    ).first()
+
     if request.method == 'POST':
 
         form = DefenseForm(
-            request.POST
+            request.POST,
+            instance=existing_defense
         )
 
         if form.is_valid():
 
-            existing_defense = Defense.objects.filter(
-                thesis=thesis
-            ).first()
+            defense = form.save(
+                commit=False
+            )
 
-            if existing_defense:
+            defense.thesis = thesis
+            defense.scheduled_by = lecturer
 
-                existing_defense.date = form.cleaned_data['date']
-                existing_defense.time = form.cleaned_data['time']
-                existing_defense.venue = form.cleaned_data['venue']
-                existing_defense.submission_deadline = form.cleaned_data['submission_deadline']
-                existing_defense.scheduled_by = lecturer
+            defense.save()
 
-                existing_defense.save()
+            # ============================================
+            # NOTIFY STUDENTS
+            # ============================================
 
-                defense = existing_defense
-
-            else:
-
-                defense = form.save(
-                    commit=False
-                )
-
-                defense.thesis = thesis
-                defense.scheduled_by = lecturer
-
-                defense.save()
-
-            # =========================
-            # SEND NOTIFICATION
-            # =========================
             members = GroupMember.objects.filter(
                 group=group
             )
@@ -719,38 +717,18 @@ def schedule_defense(request, group_id):
                 Notification.objects.create(
                     user=member.student.user,
                     message=f"""
-    Defense Scheduled
-    Group: {group.name}
-    Date: {defense.date}
-    Time: {defense.time}
-    Venue: {defense.venue}
-    Submission Deadline: {defense.submission_deadline}
-    """
-                )
-        
-            Notification.objects.create(
-                user=member.student.user,
-                message=f"""
-    Defense Scheduled
+Defense Scheduled
 
-    Date: {defense.date}
-    Time: {defense.time}
-    Venue: {defense.venue}
-    Submission Deadline: {defense.submission_deadline}
-    """
-            )
+Venue: {defense.venue}
 
-            # create progress entry
-            ThesisProgress.objects.create(
-                thesis=thesis,
-                title="Defense Scheduled",
-                description=f"""
-Defense scheduled on
-{defense.date}
-at
-{defense.time}
+Defense Date: {defense.date}
+
+Defense Time: {defense.time}
+
+Submission Deadline:
+{defense.submission_deadline}
 """
-            )
+                )
 
             messages.success(
                 request,
@@ -764,7 +742,9 @@ at
 
     else:
 
-        form = DefenseForm()
+        form = DefenseForm(
+            instance=existing_defense
+        )
 
     context = {
         'form': form,
