@@ -359,9 +359,7 @@ def review_proposal(request, proposal_id):
                 }
             )
 
-            # ============================================
             # SEND APPROVAL EMAIL
-            # ============================================
 
             if selected_status.name.lower() == "approved for defense":
 
