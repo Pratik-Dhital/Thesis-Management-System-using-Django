@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import (
     authenticate,
@@ -223,33 +223,89 @@ def manage_users(request):
     }
     return render(request,'admin_panel/manage_users.html',context)
 
-@user_passes_test(admin_required)
+@login_required
+@user_passes_test(lambda u: u.role == 'admin')
 def assign_role(request, user_id):
-    user = User.objects.get(id=user_id)
+
+    User = get_user_model()
+
+    user = get_object_or_404(
+        User,
+        id=user_id
+    )
+
+    faculties = Faculty.objects.all()
+
+    departments = Department.objects.all()
+
     if request.method == 'POST':
-        role = request.POST.get('role')
+
+        role = request.POST.get(
+            'role'
+        )
+
+        is_supervisor = request.POST.get(
+            'is_supervisor'
+        ) == 'on'
+
         user.role = role
+
         user.save()
-        # create profile automatically
+
+        # ============================================
+        # CREATE STUDENT
+        # ============================================
+
         if role == 'student':
+
             Student.objects.get_or_create(
                 user=user,
-                full_name=f"{user.first_name} {user.last_name}"
+                defaults={
+                    'full_name': user.username,
+                    'faculty': faculties.first(),
+                    'department': departments.first(),
+                }
             )
+
+        # ============================================
+        # CREATE LECTURER
+        # ============================================
+
         elif role == 'lecturer':
-            Lecturer.objects.get_or_create(
+
+            lecturer, created = Lecturer.objects.get_or_create(
                 user=user,
-                full_name=f"{user.first_name} {user.last_name}"
+                defaults={
+                    'full_name': user.username,
+                    'faculty': faculties.first(),
+                    'department': departments.first(),
+                    'designation': 'Lecturer',
+                }
             )
+
+            # SAVE SUPERVISOR STATUS
+            lecturer.is_supervisor = is_supervisor
+
+            lecturer.save()
+
         messages.success(
             request,
-            "Role assigned successfully"
+            "Role assigned successfully."
         )
-        return redirect('manage_users')
+
+        return redirect(
+            'manage_users'
+        )
+
     context = {
         'user_obj': user
     }
-    return render(request,'admin_panel/assign_roles.html',context)
+
+    return render(
+        request,
+        'admin_panel/assign_roles.html',
+        context
+    )
 
 @user_passes_test(admin_required)
 def manage_faculty(request):

@@ -9,7 +9,6 @@ from thesis.models import ThesisGroup, GroupMember
 from users.models import Lecturer
 from django.contrib import messages
 
-
 @login_required
 def send_notification(request, group_id):
 
@@ -84,7 +83,6 @@ def send_notification(request, group_id):
         'notification/send_notification.html',
         context
     )
-
 
 @login_required
 def student_notifications(request):

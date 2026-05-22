@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -66,18 +68,34 @@ def create_group(request):
     if request.method == 'POST':
 
         try:
+            name = request.POST.get('name')
 
-            name = request.POST.get(
-                'name'
-            )
+            supervisor_id = request.POST.get('supervisor')
 
-            supervisor_id = request.POST.get(
-                'supervisor'
-            )
+            member_ids = request.POST.getlist('members')
 
-            member_ids = request.POST.getlist(
-                'members'
-            )
+            # current student + selected members
+            total_members = 1 + len(member_ids)
+
+            # minimum validation
+            if total_members < 1:
+
+                messages.error(
+                    request,
+                    "A group must contain at least 1 student."
+                )
+
+                return redirect('create_group')
+
+            # maximum validation
+            if total_members > max_students:
+
+                messages.error(
+                    request,
+                    f"A group can contain maximum {max_students} students."
+                )
+
+                return redirect('create_group')
 
             supervisor = Lecturer.objects.get(
                 id=supervisor_id
