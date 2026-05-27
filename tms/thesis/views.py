@@ -1,5 +1,4 @@
 from urllib import request
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -188,18 +187,19 @@ def submit_proposal(request):
         '-version'
     ).first()
 
+    # GET DEFENSE FOR THIS GROUP
     defense = Defense.objects.filter(
         thesis__proposal__group=group
     ).first()
 
-    # deadline check
-    if defense:
+    # CHECK SUBMISSION DEADLINE
+    if defense and defense.submission_deadline:
 
         if timezone.now() > defense.submission_deadline:
 
             messages.error(
                 request,
-                "Submission deadline exceeded."
+                "Submission deadline has already exceeded."
             )
 
             return redirect(
@@ -249,7 +249,8 @@ def submit_proposal(request):
     context = {
         'form': form,
         'latest_proposal': latest_proposal,
-        'defense': defense
+        'defense': defense,
+        'now': timezone.now()
     }
 
     return render(
@@ -378,7 +379,6 @@ def review_proposal(request, proposal_id):
             )
 
             # SEND APPROVAL EMAIL
-
             if selected_status.name.lower() == "approved for defense":
 
                 pdf_buffer = generate_approval_letter(
@@ -661,10 +661,6 @@ def schedule_defense(request, group_id):
         supervisor=lecturer
     )
 
-    # ============================================
-    # GET THESIS FIRST
-    # ============================================
-
     thesis = Thesis.objects.filter(
         proposal__group=group
     ).first()
@@ -680,10 +676,20 @@ def schedule_defense(request, group_id):
             'lecturer_groups'
         )
 
-    # ============================================
-    # STATUS CHECK
-    # ============================================
+    # IMPORTANT
+    if not thesis.status:
 
+        messages.error(
+            request,
+            "Thesis status not found."
+        )
+
+        return redirect(
+            'lecturer_group_detail',
+            group.id
+        )
+
+    # STATUS CHECK
     if thesis.status.name.strip().lower() != "approved for defense":
 
         messages.error(
@@ -696,10 +702,6 @@ def schedule_defense(request, group_id):
             group.id
         )
 
-    # ============================================
-    # EXISTING DEFENSE
-    # ============================================
-
     existing_defense = Defense.objects.filter(
         thesis=thesis
     ).first()
@@ -711,6 +713,9 @@ def schedule_defense(request, group_id):
             instance=existing_defense
         )
 
+        # DEBUGGING
+        print(form.errors)
+
         if form.is_valid():
 
             defense = form.save(
@@ -721,10 +726,6 @@ def schedule_defense(request, group_id):
             defense.scheduled_by = lecturer
 
             defense.save()
-
-            # ============================================
-            # NOTIFY STUDENTS
-            # ============================================
 
             members = GroupMember.objects.filter(
                 group=group
@@ -758,6 +759,13 @@ Submission Deadline:
                 group.id
             )
 
+        else:
+
+            messages.error(
+                request,
+                "Form submission failed. Check all fields."
+            )
+
     else:
 
         form = DefenseForm(
@@ -767,7 +775,8 @@ Submission Deadline:
     context = {
         'form': form,
         'group': group,
-        'thesis': thesis
+        'thesis': thesis,
+        'defense': existing_defense,   # IMPORTANT FIX
     }
 
     return render(
@@ -797,7 +806,6 @@ def lecturer_groups(request):
         'thesis/lecturer_groups.html',
         context
     )
-
 
 # LECTURER GROUP DETAIL
 @login_required

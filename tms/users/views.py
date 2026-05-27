@@ -73,8 +73,13 @@ def student_dashboard(request):
         user=request.user
     ).order_by('-created_at')
     latest_notification = Notification.objects.filter(
-        user=request.user
+        user=request.user,
+        is_popup_shown=False
     ).order_by('-created_at').first()
+
+    if latest_notification:
+        latest_notification.is_popup_shown = True
+        latest_notification.save()
     context = {
         'has_group': has_group,
         'notifications': notifications,
@@ -252,10 +257,7 @@ def assign_role(request, user_id):
 
         user.save()
 
-        # ============================================
         # CREATE STUDENT
-        # ============================================
-
         if role == 'student':
 
             Student.objects.get_or_create(
@@ -267,10 +269,7 @@ def assign_role(request, user_id):
                 }
             )
 
-        # ============================================
         # CREATE LECTURER
-        # ============================================
-
         elif role == 'lecturer':
 
             lecturer, created = Lecturer.objects.get_or_create(

@@ -121,7 +121,29 @@
 
                     </div>
 
+                    {% if form.errors %}
 
+                    <div class="alert alert-danger">
+
+                        <strong>Form Errors:</strong>
+
+                        {{ form.non_field_errors }}
+
+                        {% for field in form %}
+
+                        {% for error in field.errors %}
+
+                        <p>
+                            <strong>{{ field.label }}</strong>: {{ error }}
+                        </p>
+
+                        {% endfor %}
+
+                        {% endfor %}
+
+                    </div>
+
+                    {% endif %}
 
                     <!-- Form -->
                     <form method="POST">
@@ -217,42 +239,41 @@
 
 <!-- Custom Styling -->
 <style>
-
-    body{
+    body {
         background: linear-gradient(to bottom right, #f4f7ff, #eef2ff);
     }
 
-    .rounded-4{
+    .rounded-4 {
         border-radius: 1.3rem;
     }
 
-    .defense-header{
+    .defense-header {
         background: linear-gradient(135deg, #0d6efd, #4f8cff);
     }
 
-    .header-icon{
+    .header-icon {
         width: 120px;
         height: 120px;
         border-radius: 50%;
-        background: rgba(255,255,255,0.15);
+        background: rgba(255, 255, 255, 0.15);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 4rem;
     }
 
-    .status-card{
+    .status-card {
         background: #f8f9ff;
         border: 1px solid #e9ecef;
         border-radius: 18px;
         padding: 25px;
     }
 
-    .status-icon{
+    .status-icon {
         width: 70px;
         height: 70px;
         border-radius: 50%;
-        background: rgba(13,110,253,0.1);
+        background: rgba(13, 110, 253, 0.1);
         color: #0d6efd;
         display: flex;
         align-items: center;
@@ -261,11 +282,11 @@
         flex-shrink: 0;
     }
 
-    .custom-form p{
+    .custom-form p {
         margin-bottom: 1.5rem;
     }
 
-    .custom-form label{
+    .custom-form label {
         display: block;
         margin-bottom: 8px;
         font-weight: 600;
@@ -274,7 +295,7 @@
 
     .custom-form input,
     .custom-form textarea,
-    .custom-form select{
+    .custom-form select {
         width: 100%;
         padding: 12px 15px;
         border: 1px solid #dee2e6;
@@ -285,21 +306,21 @@
 
     .custom-form input:focus,
     .custom-form textarea:focus,
-    .custom-form select:focus{
+    .custom-form select:focus {
         border-color: #0d6efd;
-        box-shadow: 0 0 0 0.15rem rgba(13,110,253,.15);
+        box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, .15);
         outline: none;
     }
 
-    .tips-card{
+    .tips-card {
         background: white;
     }
 
-    .tips-icon{
+    .tips-icon {
         width: 55px;
         height: 55px;
         border-radius: 50%;
-        background: rgba(255,193,7,0.15);
+        background: rgba(255, 193, 7, 0.15);
         color: #ffc107;
         display: flex;
         align-items: center;
@@ -307,12 +328,10 @@
         font-size: 1.4rem;
         flex-shrink: 0;
     }
-
 </style>
 
 
 <!-- Bootstrap Icons -->
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 {% endblock %}

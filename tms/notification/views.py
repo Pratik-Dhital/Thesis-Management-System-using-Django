@@ -1,6 +1,3 @@
-from django.shortcuts import render
-
-# Create your views here.
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Notification
@@ -8,6 +5,8 @@ from .forms import SendNotificationForm
 from thesis.models import ThesisGroup, GroupMember
 from users.models import Lecturer
 from django.contrib import messages
+
+# Create your views here.
 
 @login_required
 def send_notification(request, group_id):
