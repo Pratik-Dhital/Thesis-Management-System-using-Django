@@ -28,6 +28,8 @@ class ThesisDocumentForm(forms.ModelForm):
             # 'document_type'
         ]
 
+#schedule defence form
+
 class DefenseForm(forms.ModelForm):
 
     class Meta:
