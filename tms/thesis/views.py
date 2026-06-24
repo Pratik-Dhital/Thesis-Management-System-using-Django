@@ -21,21 +21,27 @@ from notification.models import Notification
 from django.conf import settings
 from django.core.mail import EmailMessage
 from .utils import generate_approval_letter
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from .models import Student, GroupMember, Proposal, Defense, ThesisStatus
+from .forms import ProposalForm
 
 # Create Group
 @login_required
 def create_group(request):
 
-    current_student = get_object_or_404(
-        Student,
+    current_student = Student.objects.get(
         user=request.user
     )
 
     existing_group = GroupMember.objects.filter(
         student=current_student
-    ).first()
+    ).exists()
 
     if existing_group:
+
         messages.warning(
             request,
             "You are already in a group."
@@ -49,13 +55,6 @@ def create_group(request):
         is_supervisor=True
     )
 
-    config = GroupConfiguration.objects.first()
-
-    max_students = 4
-
-    if config:
-        max_students = config.max_students_per_group
-
     students = Student.objects.filter(
         department=current_student.department
     ).exclude(
@@ -66,89 +65,56 @@ def create_group(request):
 
     if request.method == 'POST':
 
-        try:
-            name = request.POST.get('name')
+        name = request.POST.get('name')
 
-            supervisor_id = request.POST.get('supervisor')
+        supervisor_id = request.POST.get(
+            'supervisor'
+        )
 
-            member_ids = request.POST.getlist('members')
+        member_ids = request.POST.getlist(
+            'members'
+        )
 
-            # current student + selected members
-            total_members = 1 + len(member_ids)
+        supervisor = Lecturer.objects.get(
+            id=supervisor_id
+        )
 
-            # minimum validation
-            if total_members < 1:
+        # CREATE GROUP
+        group = ThesisGroup.objects.create(
+            name=name,
+            supervisor=supervisor
+        )
 
-                messages.error(
-                    request,
-                    "A group must contain at least 1 student."
-                )
+        # ADD CURRENT STUDENT
+        GroupMember.objects.create(
+            group=group,
+            student=current_student
+        )
 
-                return redirect('create_group')
+        # ADD OTHER MEMBERS
+        for member_id in member_ids:
 
-            # maximum validation
-            if total_members > max_students:
-
-                messages.error(
-                    request,
-                    f"A group can contain maximum {max_students} students."
-                )
-
-                return redirect('create_group')
-
-            supervisor = Lecturer.objects.get(
-                id=supervisor_id
+            student = Student.objects.get(
+                id=member_id
             )
 
-            group = ThesisGroup.objects.create(
-                name=name,
-                supervisor=supervisor
-            )
-
-            # add current student automatically
             GroupMember.objects.create(
                 group=group,
-                student=current_student
+                student=student
             )
 
-            # add selected members
-            for member_id in member_ids:
+        messages.success(
+            request,
+            "Group created successfully."
+        )
 
-                student = Student.objects.get(
-                    id=member_id
-                )
-
-                # prevent duplicate insert
-                if not GroupMember.objects.filter(
-                    group=group,
-                    student=student
-                ).exists():
-
-                    GroupMember.objects.create(
-                        group=group,
-                        student=student
-                    )
-
-            messages.success(
-                request,
-                "Group created successfully."
-            )
-
-            return redirect(
-                'student_dashboard'
-            )
-
-        except Exception as e:
-
-            messages.error(
-                request,
-                f"Error creating group: {str(e)}"
-            )
+        return redirect(
+            'student_dashboard'
+        )
 
     context = {
         'supervisors': supervisors,
-        'students': students,
-        'max_students': max_students
+        'students': students
     }
 
     return render(
@@ -157,19 +123,42 @@ def create_group(request):
         context
     )
 
-# SUBMIT PROPOSAL
 @login_required
 def submit_proposal(request):
 
-    student = Student.objects.get(
-        user=request.user
-    )
+    print("LOGGED IN USER:", request.user)
 
-    group = ThesisGroup.objects.filter(
-        groupmember__student=student
+    # =====================================
+    # GET STUDENT PROFILE
+    # =====================================
+    try:
+        student = Student.objects.get(
+            user=request.user
+        )
+
+    except Student.DoesNotExist:
+
+        messages.error(
+            request,
+            "Student profile not found."
+        )
+
+        return redirect(
+            'student_dashboard'
+        )
+
+    print("STUDENT:", student)
+
+    # =====================================
+    # FIND GROUP MEMBER
+    # =====================================
+    member = GroupMember.objects.filter(
+        student=student
     ).first()
 
-    if not group:
+    print("GROUP MEMBER:", member)
+
+    if not member:
 
         messages.error(
             request,
@@ -180,32 +169,42 @@ def submit_proposal(request):
             'create_group'
         )
 
-    # latest proposal
+    group = member.group
+
+    print("GROUP:", group)
+
+    # =====================================
+    # LATEST PROPOSAL
+    # =====================================
     latest_proposal = Proposal.objects.filter(
         group=group
     ).order_by(
         '-version'
     ).first()
 
-    # GET DEFENSE FOR THIS GROUP
+    # =====================================
+    # DEFENSE CHECK
+    # =====================================
     defense = Defense.objects.filter(
         thesis__proposal__group=group
     ).first()
 
-    # CHECK SUBMISSION DEADLINE
-    if defense and defense.submission_deadline:
+    # if defense and defense.submission_deadline:
 
-        if timezone.now() > defense.submission_deadline:
+    #     if timezone.now() > defense.submission_deadline:
 
-            messages.error(
-                request,
-                "Submission deadline has already exceeded."
-            )
+    #         messages.error(
+    #             request,
+    #             "Submission deadline exceeded."
+    #         )
 
-            return redirect(
-                'student_dashboard'
-            )
+    #         return redirect(
+    #             'student_dashboard'
+    #         )
 
+    # =====================================
+    # FORM SUBMISSION
+    # =====================================
     if request.method == 'POST':
 
         form = ProposalForm(
@@ -213,7 +212,11 @@ def submit_proposal(request):
             request.FILES
         )
 
+        print("POST REQUEST RECEIVED")
+
         if form.is_valid():
+
+            print("FORM VALID")
 
             proposal = form.save(
                 commit=False
@@ -221,17 +224,20 @@ def submit_proposal(request):
 
             proposal.group = group
 
-            proposal.status = ThesisStatus.objects.get(
+            pending_status, created = ThesisStatus.objects.get_or_create(
                 name='Pending'
             )
 
-            # versioning
+            proposal.status = pending_status
+
             if latest_proposal:
                 proposal.version = latest_proposal.version + 1
             else:
                 proposal.version = 1
 
             proposal.save()
+
+            print("PROPOSAL SAVED")
 
             messages.success(
                 request,
@@ -242,15 +248,24 @@ def submit_proposal(request):
                 'student_dashboard'
             )
 
+        else:
+
+            print(form.errors)
+
+            messages.error(
+                request,
+                "Form submission failed."
+            )
+
     else:
 
         form = ProposalForm()
 
     context = {
         'form': form,
+        'group': group,
         'latest_proposal': latest_proposal,
-        'defense': defense,
-        'now': timezone.now()
+        'defense': defense
     }
 
     return render(
@@ -258,6 +273,7 @@ def submit_proposal(request):
         'thesis/submit_proposal.html',
         context
     )
+
 
 # LECTURER PROPOSALS
 @login_required

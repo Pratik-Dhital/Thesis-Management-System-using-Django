@@ -7,8 +7,7 @@
     <!-- Floating Notification Popup -->
     {% if latest_notification %}
 
-    <div id="popup-notification"
-         class="notification-popup shadow-lg">
+    <div id="popup-notification" class="notification-popup shadow-lg">
 
         <div class="d-flex align-items-start">
 
@@ -24,14 +23,12 @@
                         Defense Scheduled
                     </h5>
 
-                    <button class="btn-close btn-sm"
-                            onclick="closePopup()">
+                    <button class="btn-close btn-sm" onclick="closePopup()">
                     </button>
 
                 </div>
 
-                <p class="mb-0 text-muted"
-                   style="white-space: pre-line;">
+                <p class="mb-0 text-muted" style="white-space: pre-line;">
 
                     {{ latest_notification.message }}
 
@@ -122,8 +119,7 @@
 
                     {% if not has_group %}
 
-                    <a href="{% url 'create_group' %}"
-                       class="btn btn-success rounded-pill px-4">
+                    <a href="{% url 'create_group' %}" class="btn btn-success rounded-pill px-4">
 
                         <i class="bi bi-plus-circle me-2"></i>
                         Create Group
@@ -132,8 +128,7 @@
 
                     {% else %}
 
-                    <button class="btn btn-outline-success rounded-pill px-4"
-                            disabled>
+                    <button class="btn btn-outline-success rounded-pill px-4" disabled>
 
                         <i class="bi bi-check-circle-fill me-2"></i>
                         Group Created
@@ -170,8 +165,7 @@
 
                     {% if has_group %}
 
-                    <a href="{% url 'submit_proposal' %}"
-                       class="btn btn-warning text-dark rounded-pill px-4">
+                    <a href="{% url 'submit_proposal' %}" class="btn btn-warning text-dark rounded-pill px-4">
 
                         <i class="bi bi-upload me-2"></i>
                         Submit Proposal
@@ -180,8 +174,7 @@
 
                     {% else %}
 
-                    <button class="btn btn-secondary rounded-pill px-4"
-                            disabled>
+                    <button class="btn btn-secondary rounded-pill px-4" disabled>
 
                         <i class="bi bi-lock-fill me-2"></i>
                         Create Group First
@@ -217,8 +210,7 @@
                         defense schedules, and announcements.
                     </p>
 
-                    <a href="{% url 'student_notifications' %}"
-                       class="btn btn-info text-white rounded-pill px-4">
+                    <a href="{% url 'student_notifications' %}" class="btn btn-info text-white rounded-pill px-4">
 
                         <i class="bi bi-eye-fill me-2"></i>
                         View Notifications
@@ -234,6 +226,8 @@
     </div>
 
 
+
+
     <!-- Recent Notifications -->
     <div class="mt-5">
 
@@ -243,8 +237,7 @@
                 Recent Notifications
             </h3>
 
-            <a href="{% url 'student_notifications' %}"
-               class="btn btn-outline-primary rounded-pill">
+            <a href="{% url 'student_notifications' %}" class="btn btn-outline-primary rounded-pill">
 
                 View All
 
@@ -255,33 +248,33 @@
 
         {% if notifications %}
 
-            {% for notification in notifications %}
+        {% for notification in notifications %}
 
-            <div class="notification-card shadow-sm rounded-4 p-4 mb-3">
+        <div class="notification-card shadow-sm rounded-4 p-4 mb-3">
 
-                <div class="d-flex align-items-start">
+            <div class="d-flex align-items-start">
 
-                    <div class="notification-icon-small me-3">
-                        <i class="bi bi-bell-fill"></i>
-                    </div>
+                <div class="notification-icon-small me-3">
+                    <i class="bi bi-bell-fill"></i>
+                </div>
 
-                    <div>
+                <div>
 
-                        <h6 class="fw-bold mb-1">
-                            System Notification
-                        </h6>
+                    <h6 class="fw-bold mb-1">
+                        System Notification
+                    </h6>
 
-                        <p class="text-muted mb-0">
-                            {{ notification.message }}
-                        </p>
-
-                    </div>
+                    <p class="text-muted mb-0">
+                        {{ notification.message }}
+                    </p>
 
                 </div>
 
             </div>
 
-            {% endfor %}
+        </div>
+
+        {% endfor %}
 
         {% else %}
 
@@ -328,7 +321,15 @@
             <div class="stats-card shadow-sm rounded-4 p-4 text-center">
 
                 <h2 class="fw-bold text-warning">
-                    Pending
+                    {% if proposal_status == "approved for defense" %}
+                        Approved
+                    {% elif proposal_status == "Pending" %}
+                        Pending
+                    {% elif proposal_status == "Under Review" %}
+                        Under Review
+                    {% else %}
+                        N/A
+                    {% endif %}
                 </h2>
 
                 <p class="text-muted mb-0">
@@ -363,34 +364,33 @@
 
 <!-- Custom Styling -->
 <style>
-
-    body{
+    body {
         background: linear-gradient(to bottom right, #f4f7ff, #eef2ff);
     }
 
-    .rounded-4{
+    .rounded-4 {
         border-radius: 1.2rem;
     }
 
-    .welcome-section{
+    .welcome-section {
         background: white;
     }
 
-    .dashboard-icon{
+    .dashboard-icon {
         font-size: 5rem;
         color: #0d6efd;
     }
 
-    .dashboard-card{
+    .dashboard-card {
         border-radius: 1.5rem;
         transition: all 0.3s ease;
     }
 
-    .dashboard-card:hover{
+    .dashboard-card:hover {
         transform: translateY(-8px);
     }
 
-    .icon-box{
+    .icon-box {
         width: 90px;
         height: 90px;
         border-radius: 50%;
@@ -401,29 +401,29 @@
         font-size: 2.5rem;
     }
 
-    .stats-card{
+    .stats-card {
         background: white;
         transition: 0.3s ease;
     }
 
-    .stats-card:hover{
+    .stats-card:hover {
         transform: scale(1.03);
     }
 
-    .notification-card{
+    .notification-card {
         background: white;
         transition: 0.3s ease;
     }
 
-    .notification-card:hover{
+    .notification-card:hover {
         transform: translateY(-3px);
     }
 
-    .notification-icon-small{
+    .notification-icon-small {
         width: 55px;
         height: 55px;
         border-radius: 50%;
-        background: rgba(13,110,253,0.1);
+        background: rgba(13, 110, 253, 0.1);
         color: #0d6efd;
         display: flex;
         align-items: center;
@@ -432,16 +432,16 @@
         flex-shrink: 0;
     }
 
-    .empty-notification{
+    .empty-notification {
         background: white;
     }
 
-    .empty-icon{
+    .empty-icon {
         font-size: 4rem;
         color: #adb5bd;
     }
 
-    .notification-popup{
+    .notification-popup {
         position: fixed;
         top: 20px;
         right: 20px;
@@ -454,11 +454,11 @@
         border-left: 5px solid #198754;
     }
 
-    .popup-icon{
+    .popup-icon {
         width: 55px;
         height: 55px;
         border-radius: 50%;
-        background: rgba(25,135,84,0.1);
+        background: rgba(25, 135, 84, 0.1);
         color: #198754;
         display: flex;
         align-items: center;
@@ -466,12 +466,10 @@
         font-size: 1.4rem;
         flex-shrink: 0;
     }
-
 </style>
 
 
 <!-- Bootstrap Icons -->
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 {% endblock %}

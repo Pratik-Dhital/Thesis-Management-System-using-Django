@@ -2,23 +2,24 @@
 {% block start %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8"> 
+        <div class="col-lg-8">
             <!-- Main Card -->
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden"> 
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
                 <!-- Header -->
                 <div class="proposal-header text-white p-5">
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
                         <div> <span class="badge bg-light text-primary px-3 py-2 mb-3"> Thesis Submission </span>
                             <h1 class="fw-bold mb-2"> Submit Proposal </h1>
-                            <p class="opacity-75 mb-0"> Upload your thesis proposal document for supervisor and lecturer review. </p>
+                            <p class="opacity-75 mb-0"> Upload your thesis proposal document for supervisor and lecturer
+                                review. </p>
                         </div>
                         <div class="mt-4 mt-md-0">
                             <div class="header-icon"> <i class="bi bi-file-earmark-arrow-up-fill"></i> </div>
                         </div>
                     </div>
-                </div> 
+                </div>
                 <!-- Form Body -->
-                <div class="card-body p-4 p-md-5"> 
+                <div class="card-body p-4 p-md-5">
                     <!-- Information Box -->
                     <div class="info-box mb-5">
                         <div class="d-flex align-items-start">
@@ -32,31 +33,43 @@
                                 </ul>
                             </div>
                         </div>
-                    </div> 
+                    </div>
                     <!-- Form -->
-                    <form method="POST" enctype="multipart/form-data"> 
-                        {% csrf_token %} 
-                        <div class="custom-form"> 
-                            {{form.as_p }} 
-                        </div> 
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="custom-form">
+                            {% if form.errors %}
+
+                            <div class="alert alert-danger">
+
+                                {{ form.errors }}
+
+                            </div>
+
+                            {% endif %}
+                            {{form.as_p }}
+                        </div>
                         <!-- Submit Button -->
-                        <div class="text-end mt-4"> <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm"> <i class="bi bi-upload me-2"></i> Submit Proposal </button> </div>
+                        <div class="text-end mt-4"> <button type="submit"
+                                class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm"> <i
+                                    class="bi bi-upload me-2"></i> Submit Proposal </button> </div>
                     </form>
                 </div>
-            </div> 
+            </div>
             <!-- Extra Tips -->
             <div class="tips-card shadow-sm rounded-4 p-4 mt-4">
                 <div class="d-flex align-items-start">
                     <div class="tips-icon me-3"> <i class="bi bi-lightbulb-fill"></i> </div>
                     <div>
                         <h5 class="fw-bold mb-2"> Helpful Tips </h5>
-                        <p class="text-muted mb-0"> Double-check your proposal title, description, and uploaded file before submission to avoid revisions later. </p>
+                        <p class="text-muted mb-0"> Double-check your proposal title, description, and uploaded file
+                            before submission to avoid revisions later. </p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div> 
+</div>
 <!-- Custom Styling -->
 <style>
     body {
