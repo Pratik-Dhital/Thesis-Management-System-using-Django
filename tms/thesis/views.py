@@ -128,9 +128,7 @@ def submit_proposal(request):
 
     print("LOGGED IN USER:", request.user)
 
-    # =====================================
     # GET STUDENT PROFILE
-    # =====================================
     try:
         student = Student.objects.get(
             user=request.user
@@ -149,9 +147,7 @@ def submit_proposal(request):
 
     print("STUDENT:", student)
 
-    # =====================================
     # FIND GROUP MEMBER
-    # =====================================
     member = GroupMember.objects.filter(
         student=student
     ).first()
@@ -173,38 +169,32 @@ def submit_proposal(request):
 
     print("GROUP:", group)
 
-    # =====================================
     # LATEST PROPOSAL
-    # =====================================
     latest_proposal = Proposal.objects.filter(
         group=group
     ).order_by(
         '-version'
     ).first()
 
-    # =====================================
     # DEFENSE CHECK
-    # =====================================
     defense = Defense.objects.filter(
         thesis__proposal__group=group
     ).first()
 
-    # if defense and defense.submission_deadline:
+    if defense and defense.submission_deadline:
 
-    #     if timezone.now() > defense.submission_deadline:
+        if timezone.now() > defense.submission_deadline:
 
-    #         messages.error(
-    #             request,
-    #             "Submission deadline exceeded."
-    #         )
+            messages.error(
+                request,
+                "Submission deadline exceeded."
+            )
 
-    #         return redirect(
-    #             'student_dashboard'
-    #         )
+            return redirect(
+                'student_dashboard'
+            )
 
-    # =====================================
     # FORM SUBMISSION
-    # =====================================
     if request.method == 'POST':
 
         form = ProposalForm(
